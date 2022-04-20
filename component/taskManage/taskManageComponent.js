@@ -61,7 +61,7 @@ function TaskManageComponent(props) {
                                             </div>
                                             {
                                                 item.component &&
-                                                React.cloneElement(item.component, { ...props })
+                                                React.cloneElement(item.component)
                                             }
                                         </div>
                                     </li>
