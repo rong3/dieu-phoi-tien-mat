@@ -22,7 +22,7 @@ function TabControlCustom(props) {
         setTimeout(() => {
             handleTabChange(0)
         }, 0);
-    }, [tabData])
+    }, [])
 
     useEffect(() => {
         if (onAdd?.func?.id !== null) {
@@ -41,7 +41,7 @@ function TabControlCustom(props) {
         else {
             handleTabChange(coreTab.activeIndex)
         }
-    }, [coreTab])
+    }, [coreTab.activeIndex, coreTab.tabs])
 
     /*UTILS*/
     const removeTemplate = (index) => {
@@ -103,6 +103,7 @@ function TabControlCustom(props) {
             const closable = !tabData.primary;
             tabTemplate.push(<Tab key={tabData.key} closable={closable}>{renderByKey(tabData)}</Tab>);
             panelTemplate.push(<Panel key={tabData.key}>{React.cloneElement(tabData.children)}</Panel>);
+            handleTabChange(coreTab.tabs.length - 1)
         }
     }
 

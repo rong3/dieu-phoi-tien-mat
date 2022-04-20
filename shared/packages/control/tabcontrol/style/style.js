@@ -56,9 +56,9 @@ ActionButtonStyle = styled(ActionButtonStyle)`
 `;
 
 PanelStyle = styled(PanelStyle)`
-border-left: 1px solid rgba(0,0,0,0.12);
-  border-right: 1px solid rgba(0,0,0,0.12);
-  border-bottom: 1px solid rgba(0,0,0,0.12);
+  border-left: 1px solid #eee;
+  border-right: 1px solid #eee;
+  border-bottom: 1px solid #eee;
   transition: box-shadow .25s, -webkit-box-shadow .25s;
   border-radius: 2px;
   padding: 0;

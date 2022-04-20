@@ -1,0 +1,14 @@
+.group-box-custom {
+    height: 200px;
+    overflow: auto;
+    border: 1px solid #eee;
+    padding: 5px;
+    width: 100%;
+    .item {
+        width: 98%;
+        font-size: 14px;
+        margin-top: 5px;
+        padding: 5px;
+        border: 1px solid #bfe8ff;
+    }
+}

@@ -48,9 +48,9 @@ function TaskManageComponent(props) {
                         {
                             menuTab?.map((item, index) => {
                                 return (
-                                    <li className={`item-customer`} key={item.key}>
+                                    <li className={`item-customer ${index === 0 ? 'active' : ''}`} key={item.key}>
                                         <div className="row">
-                                            <div className="left-box col-12 col-lg-3 col-xl-3">
+                                            <div className="left-box col-12 col-lg-2 col-xl-2">
                                                 <a className="link-info">
                                                     <img src={item.previewImg} />
                                                     <div className="name">
@@ -59,10 +59,12 @@ function TaskManageComponent(props) {
                                                     </div>
                                                 </a>
                                             </div>
-                                            {
-                                                item.component &&
-                                                React.cloneElement(item.component)
-                                            }
+                                            <div className="right-box col-12 col-lg-10 col-xl-10">
+                                                {
+                                                    item.component &&
+                                                    React.cloneElement(item.component)
+                                                }
+                                            </div>
                                         </div>
                                     </li>
                                 )

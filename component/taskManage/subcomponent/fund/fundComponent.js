@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import DataGridControl from '../../../../shared/packages/control/grid/datagrid';
 import Modal from "../../../../shared/packages/control/modal/index";
 import TabControlCustom from "../../../../shared/packages/control/tabcontrol/index"
+import TicketRequiredComponent from "./component/ticketRequired/ticketRequiredComponent"
 
 function FundComponent(props) {
     const router = useRouter();
@@ -19,7 +20,7 @@ function FundComponent(props) {
                 primary: false,
                 title: id ?? "Bản nháp",
                 key: 'tabPage',
-                children: <></>
+                children: <TicketRequiredComponent id={id} />
             }
         })
     }
@@ -66,7 +67,7 @@ function FundComponent(props) {
             flex: 1,
             editable: true,
             renderCell: (cell) => {
-                return <a role={"button"} onClick={() => {
+                return <a role={"button"} style={{ color: "#ffc107" }} onClick={() => {
                     addTabData(cell?.id)
                 }}>
                     {cell?.id}
@@ -84,14 +85,11 @@ function FundComponent(props) {
             field: 'statusCode',
             headerName: "Trạng thái",
             headerClassName: 'headerColumn',
-            headerAlign: 'center',
             flex: 1,
             editable: true,
             renderCell: (cell) => {
-                return <div className="box-action-container">
-                    <div className='item text-success'>
-                        Đã duyệt
-                    </div>
+                return <div className="text-success">
+                    Đã duyệt
                 </div>
             }
         },
@@ -127,7 +125,7 @@ function FundComponent(props) {
     }, [])
 
     return (
-        <div className="right-box col-12 col-lg-9 col-xl-9">
+        <>
             <div className="info-box">
                 <p className="name row">
                     <div className='col-md-6'>
@@ -138,13 +136,14 @@ function FundComponent(props) {
                             <button className='btn btn-warning' onClick={() => {
                                 addTabData(null)
                             }}>
-                                Tạo mới
+                                Tạo yêu cầu
                             </button>
                         </div>
                     </div>
                 </p>
             </div>
-            <div className="description mt-2">
+            <hr />
+            <div className="description">
                 <div className='wrapper-tab'>
                     {
                         tabData.length > 0 &&
@@ -155,7 +154,7 @@ function FundComponent(props) {
                     }
                 </div>
             </div>
-        </div>
+        </>
     );
 }
 
