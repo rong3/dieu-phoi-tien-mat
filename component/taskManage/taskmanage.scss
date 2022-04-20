@@ -1,0 +1,228 @@
+.priority-user-content {
+    max-width: 1700px;
+    margin: 0 auto;
+}
+
+.priority-user-content .customers-box {
+    margin-top: 60px;
+}
+
+@media screen and (max-width: 768.98px) {
+    .priority-user-content .customers-box {
+        margin-top: 10px;
+    }
+}
+
+.priority-user-content .customers-box .list-customers {
+    padding: 40px;
+    box-shadow: 0px 4px 24px rgba(0, 0, 0, 0.12);
+    border-radius: 20px;
+    position: relative;
+    min-height: 630px;
+}
+
+@media screen and (max-width: 575.98px) {
+    .priority-user-content .customers-box .list-customers {
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+}
+
+.priority-user-content .customers-box .list-customers .item-customer {
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.priority-user-content .customers-box .list-customers .item-customer .left-box {
+    position: relative;
+}
+
+@media screen and (max-width: 575.98px) {
+    .priority-user-content .customers-box .list-customers .item-customer .left-box {
+        height: 106px;
+    }
+}
+
+.priority-user-content .customers-box .list-customers .item-customer .left-box a {
+    height: 100%;
+    width: 100%;
+    position: relative;
+    display: block;
+    overflow: hidden;
+    padding-top: 30.7580174927%;
+}
+
+@media screen and (max-width: 575.98px) {
+    .priority-user-content .customers-box .list-customers .item-customer .left-box a {
+        padding: 0;
+    }
+}
+
+.priority-user-content .customers-box .list-customers .item-customer .left-box a img,
+.priority-user-content .customers-box .list-customers .item-customer .left-box a iframe,
+.priority-user-content .customers-box .list-customers .item-customer .left-box a video {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    object-fit: cover;
+    transition: 0.3s ease-in-out all;
+}
+
+.priority-user-content .customers-box .list-customers .item-customer .left-box a img {
+    border-radius: 12px;
+    cursor: pointer;
+    &:hover {
+        transform: scale(1.1);
+        transition: 0.3s ease-in-out all;
+    }
+}
+
+.priority-user-content .customers-box .list-customers .item-customer .left-box a .name {
+    color: white;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    font-size: 24px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(360deg, #000000 -3.93%, rgba(0, 0, 0, 0) 50.15%);
+    filter: drop-shadow(0px 4px 24px rgba(0, 0, 0, 0.12));
+    border-radius: 12px;
+    width: 100%;
+    padding-left: 15px;
+    padding-bottom: 16px;
+}
+
+@media screen and (max-width: 575.98px) {
+    .priority-user-content .customers-box .list-customers .item-customer .left-box a .name {
+        font-size: 1rem;
+        line-height: 23px !important;
+    }
+}
+
+.priority-user-content .customers-box .list-customers .item-customer .left-box a .name .arrow {
+    background: url(/asset/images/priority-user/Arrow-Right.png);
+    width: 20px;
+    height: 20px;
+    margin-top: 3px;
+    margin-left: 6px;
+}
+
+@media screen and (max-width: 575.98px) {
+    .priority-user-content .customers-box .list-customers .item-customer .left-box a .name .arrow {
+        transform: rotate(-90deg);
+        margin: 6px 0 0 10px;
+    }
+}
+
+.priority-user-content .customers-box .list-customers .item-customer .right-box {
+    position: absolute;
+    padding-left: 30px;
+    top: 30px;
+    right: 0;
+    padding-right: 30px;
+    max-height: 560px;
+    overflow-x: auto;
+    display: none;
+
+    @media (max-width: 992px) {
+        position: relative;
+        top: auto;
+    }
+}
+
+@media screen and (max-width: 575.98px) {
+    .priority-user-content .customers-box .list-customers .item-customer .right-box {
+        padding-left: calc(var(--bs-gutter-x) * 0.5) !important;
+        position: relative !important;
+        padding-right: calc(var(--bs-gutter-x) * 0.5) !important;
+        top: 0;
+        overflow-x: unset;
+        max-height: unset;
+    }
+}
+
+.priority-user-content .customers-box .list-customers .item-customer .right-box .info-box {
+    margin-top: 0;
+    // display: none;
+}
+
+@media screen and (max-width: 575.98px) {
+    .priority-user-content .customers-box .list-customers .item-customer .right-box .info-box {
+        position: relative !important;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+        border-radius: 20px;
+        padding: 16px;
+        margin-top: 10px !important;
+    }
+}
+
+.priority-user-content .customers-box .list-customers .item-customer .right-box .info-box .name {
+    font-weight: bold;
+    font-size: 1.5rem;
+    line-height: 47px;
+    .toolbar {
+        float: right;
+    }
+}
+
+@media screen and (max-width: 575.98px) {
+    .priority-user-content .customers-box .list-customers .item-customer .right-box .info-box .name {
+        display: none;
+    }
+}
+
+.priority-user-content .customers-box .list-customers .item-customer .right-box .info-box .description p {
+    text-align: justify;
+}
+
+.priority-user-content .customers-box .list-customers .item-customer .right-box .info-box .description p + p {
+    padding-top: 16px;
+}
+
+@media screen and (max-width: 575.98px) {
+    .priority-user-content .customers-box .list-customers .item-customer .right-box .info-box .description p {
+        font-size: 0.75rem;
+    }
+}
+
+.priority-user-content .customers-box .list-customers .item-customer .right-box .info-box .description ul li {
+    list-style: initial;
+}
+
+@media screen and (max-width: 575.98px) {
+    .priority-user-content .customers-box .list-customers .item-customer.active .left-box {
+        height: 45px;
+    }
+}
+
+@media screen and (max-width: 575.98px) {
+    .priority-user-content .customers-box .list-customers .item-customer.active .left-box a img {
+        height: 45px !important;
+    }
+}
+
+@media screen and (max-width: 575.98px) {
+    .priority-user-content .customers-box .list-customers .item-customer.active .left-box a .name {
+        top: 0;
+        height: 100%;
+    }
+}
+
+@media screen and (max-width: 575.98px) {
+    .priority-user-content .customers-box .list-customers .item-customer.active .left-box a .name .arrow {
+        transform: rotate(90deg);
+        margin: 0 0 0 10px;
+    }
+}
+
+.priority-user-content .customers-box .list-customers .item-customer.active .right-box {
+    display: block;
+}
+
+.priority-user-content .customers-box .list-customers .item-customer.active .right-box .info-box {
+    display: block;
+}
