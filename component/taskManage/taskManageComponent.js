@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 import FundComponent from "./subcomponent/fund/fundComponent"
 import FundReleaseComponent from "./subcomponent/fundRelease/fundRelease"
+import VehicleComponent from "./subcomponent/vehicle/vehicleComponent"
+import VehicleReleaseComponent from "./subcomponent/vehicleRelease/vehicleRelease"
 
 function TaskManageComponent(props) {
     const router = useRouter()
@@ -36,13 +38,13 @@ function TaskManageComponent(props) {
             key: 'vehicle',
             title: "Yêu cầu Hỗ trợ xe",
             previewImg: 'https://openapi.it/writable/uploads/1600353502_fd966fb5b68059423c68.jpg',
-            component: null
+            component: <VehicleComponent {...props} />
         },
         {
             key: 'vehicle',
             title: "Phiếu hỗ trợ xe",
             previewImg: 'https://openapi.it/writable/uploads/1600353502_fd966fb5b68059423c68.jpg',
-            component: null
+            component: <VehicleReleaseComponent {...props} />
         },
     ]
 

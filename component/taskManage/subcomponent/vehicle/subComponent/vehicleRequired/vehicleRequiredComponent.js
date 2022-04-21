@@ -4,7 +4,7 @@ import GroupBoxComponent from "../../../../../shared/groupBox/groupBox"
 import SelectBox from "../../../../../../shared/packages/control/selectBox/selectBox"
 import { InputControl } from "../../../../../../shared/packages/control/input/inputControl"
 import DateTimeInput from "../../../../../../shared/packages/control/input/datetime"
-import ListFundRelaseBelongs from "../listFundRelaseBelongs/listFundRelaseBelongs"
+import ListVehicleBelongs from "../listVehicleBelongs/listVehicleBelongs"
 import {
     Box,
     Divider,
@@ -12,8 +12,7 @@ import {
 } from "@material-ui/core";
 import HistoryComponent from "../../../../../shared/history/history"
 
-
-function TicketRequiredComponent(props) {
+function VehicleRequiredComponent(props) {
     const { id } = props;
     const router = useRouter()
     const keyMenuFloat = 'right';
@@ -45,20 +44,56 @@ function TicketRequiredComponent(props) {
     );
 
 
-    const masterData = [
-        {
-            id: 1,
-            name: 'Hồ Chí Minh'
-        },
-        {
-            id: 2,
-            name: 'Hà Nội'
-        },
-        {
-            id: 3,
-            name: 'Đồng Nai'
-        }
-    ]
+    const masterData = {
+        type: [
+            {
+                id: 1,
+                name: 'Theo thực tế'
+            },
+            {
+                id: 2,
+                name: 'Theo hợp đồng'
+            }
+        ],
+        question: [
+            {
+                id: 1,
+                name: 'Có'
+            },
+            {
+                id: 2,
+                name: 'Không'
+            }
+        ],
+        required: [
+            {
+                id: 1,
+                name: 'Thu hộ'
+            },
+            {
+                id: 2,
+                name: 'Chi hộ'
+            },
+            {
+                id: 3,
+                name: 'Tiếp ATM'
+            },
+        ],
+        city: [
+            {
+                id: 1,
+                name: 'Hồ Chí Minh'
+            },
+            {
+                id: 2,
+                name: 'Hà Nội'
+            },
+            {
+                id: 3,
+                name: 'Đồng Nai'
+            }
+        ]
+    }
     const [modelData, setModelData] = useState({
         typeCurrency: [
             {
@@ -125,17 +160,41 @@ function TicketRequiredComponent(props) {
                     {`Trạng thái: ${id ? 'Tiếp nhận' : 'Nháp'}`}
                 </span>
             </div>
+            {
+                id &&
+                <div className="row p-2">
+                    <div className="col-md-2">
+                        <span>Bản sửa đổi bổ sung</span>
+                        <SelectBox id="selectbox"
+                            optionLabel="name"
+                            optionValue="id"
+                            onChange={(data) => {
+
+                            }}
+                            value={null}
+                            isPortal
+                            options={[]}
+                        />
+                    </div>
+                </div>
+            }
             <div className='row p-2'>
                 <div className='col-md-11'>
                     <div className="row">
                         <div className="col-md-4">
-                            <span>Mã ĐVKD yêu cầu</span>
-                            <InputControl type="text" id="name" onChange={(e) => {
-                                const value = e.target.value ?? '';
-                            }} defaultValue={null} />
+                            <span>Loại Yêu cầu</span>
+                            <SelectBox id="selectbox"
+                                optionLabel="name"
+                                optionValue="id"
+                                onChange={(data) => {
+                                }}
+                                value={null}
+                                isPortal
+                                options={masterData.type}
+                            />
                         </div>
                         <div className="col-md-4">
-                            <span>Tên ĐVKD yêu cầu</span>
+                            <span>Tên khách hàng</span>
                             <InputControl type="text" id="name" onChange={(e) => {
                                 const value = e.target.value ?? '';
                             }} defaultValue={null} />
@@ -147,7 +206,19 @@ function TicketRequiredComponent(props) {
                             }} defaultValue={null} />
                         </div>
                         <div className="col-md-4">
-                            <span>Ngày yêu cầu</span>
+                            <span>Yêu cầu</span>
+                            <SelectBox id="selectbox"
+                                optionLabel="name"
+                                optionValue="id"
+                                onChange={(data) => {
+                                }}
+                                value={null}
+                                isPortal
+                                options={masterData.required}
+                            />
+                        </div>
+                        <div className="col-md-4">
+                            <span>Thời gian</span>
                             <DateTimeInput selected={new Date()}
                                 isDefaultEmpty
                                 isPortal
@@ -156,23 +227,28 @@ function TicketRequiredComponent(props) {
                                 }} />
                         </div>
                         <div className="col-md-4">
-                            <span>Loại Yêu cầu</span>
-                            <SelectBox id="selectbox"
-                                optionLabel="name"
-                                optionValue="id"
-                                onChange={(data) => {
-
-                                }}
-                                value={null}
-                                isPortal
-                                options={[]}
-                            />
+                            <span>Địa điểm</span>
+                            <InputControl type="text" id="name" onChange={(e) => {
+                                const value = e.target.value ?? '';
+                            }} defaultValue={null} />
                         </div>
                         <div className="col-md-4">
                             <span>Mô tả</span>
                             <InputControl type="text" id="name" onChange={(e) => {
                                 const value = e.target.value ?? '';
                             }} defaultValue={null} />
+                        </div>
+                        <div className="col-md-4">
+                            <span>Nộp quỹ</span>
+                            <SelectBox id="selectbox"
+                                optionLabel="name"
+                                optionValue="id"
+                                onChange={(data) => {
+                                }}
+                                value={null}
+                                isPortal
+                                options={masterData.question}
+                            />
                         </div>
                     </div>
 
@@ -194,7 +270,7 @@ function TicketRequiredComponent(props) {
                         <div className="col-md-4">
                             <span>Chuyển thực thi</span>
                             {
-                                masterData?.map(item => {
+                                masterData.city?.map(item => {
                                     return (
                                         <div class="form-check">
                                             <input
@@ -211,7 +287,6 @@ function TicketRequiredComponent(props) {
                             }
                         </div>
                     </div>
-
                 </div>
 
                 <div className='col-md-1'>
@@ -245,9 +320,7 @@ function TicketRequiredComponent(props) {
             </div>
             {
                 id &&
-                <>
-                    <ListFundRelaseBelongs id={id} />
-                </>
+                <ListVehicleBelongs id={id} />
             }
             {
                 <Drawer
@@ -263,4 +336,4 @@ function TicketRequiredComponent(props) {
     );
 }
 
-export default TicketRequiredComponent;
+export default VehicleRequiredComponent;

@@ -4,11 +4,42 @@ import GroupBoxComponent from "../../../../../shared/groupBox/groupBox"
 import SelectBox from "../../../../../../shared/packages/control/selectBox/selectBox"
 import { InputControl } from "../../../../../../shared/packages/control/input/inputControl"
 import DateTimeInput from "../../../../../../shared/packages/control/input/datetime"
+import {
+    Box,
+    Divider,
+    Drawer
+} from "@material-ui/core";
+import HistoryComponent from "../../../../../shared/history/history"
 
 function FundReleaseContainer(props) {
     const { id } = props;
     const router = useRouter()
+    const keyMenuFloat = 'right';
+    const [stateSlide, setStateSlide] = React.useState({
+        top: false,
+        left: false,
+        bottom: false,
+        right: false,
+    });
 
+    const toggleDrawer = (open) => (event) => {
+        if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+            return;
+        }
+        setStateSlide({ ...stateSlide, [keyMenuFloat]: open });
+    };
+
+    const closeSideBar = (open) => {
+        setStateSlide({ ...stateSlide, [keyMenuFloat]: open });
+    }
+    const list = (anchor) => (
+        <Box
+            sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 320 }}
+            role="presentation"
+        >
+            <HistoryComponent data={[]} />
+        </Box>
+    );
     const [modelData, setModelData] = useState({
         typeCurrency: [
             {
@@ -216,6 +247,12 @@ function FundReleaseContainer(props) {
                     <div className='toolbar'>
                         <div className='container-item'>
                             <div className='item'>
+                                <i className='fas fa-history' title='Lịch sử'
+                                    onClick={toggleDrawer(!stateSlide[keyMenuFloat])}
+                                >
+                                </i>
+                            </div>
+                            <div className='item'>
                                 <i className='fas fa-save text-info' title='Lưu'
                                     onClick={() => {
                                         console.log({ modelData });
@@ -235,6 +272,16 @@ function FundReleaseContainer(props) {
                     </div>
                 </div>
             </div>
+            {
+                <Drawer
+                    anchor={keyMenuFloat}
+                    open={stateSlide[keyMenuFloat]}
+                    BackdropProps={{ invisible: true }}
+                    onClose={toggleDrawer(false)}
+                >
+                    {list(keyMenuFloat)}
+                </Drawer>
+            }
         </section>
     );
 }

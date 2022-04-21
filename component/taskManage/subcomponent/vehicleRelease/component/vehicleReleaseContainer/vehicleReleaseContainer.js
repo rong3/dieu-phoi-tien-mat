@@ -4,7 +4,6 @@ import GroupBoxComponent from "../../../../../shared/groupBox/groupBox"
 import SelectBox from "../../../../../../shared/packages/control/selectBox/selectBox"
 import { InputControl } from "../../../../../../shared/packages/control/input/inputControl"
 import DateTimeInput from "../../../../../../shared/packages/control/input/datetime"
-import ListFundRelaseBelongs from "../listFundRelaseBelongs/listFundRelaseBelongs"
 import {
     Box,
     Divider,
@@ -13,7 +12,7 @@ import {
 import HistoryComponent from "../../../../../shared/history/history"
 
 
-function TicketRequiredComponent(props) {
+function VehicleReleaseContainer(props) {
     const { id } = props;
     const router = useRouter()
     const keyMenuFloat = 'right';
@@ -43,22 +42,6 @@ function TicketRequiredComponent(props) {
             <HistoryComponent data={[]} />
         </Box>
     );
-
-
-    const masterData = [
-        {
-            id: 1,
-            name: 'Hồ Chí Minh'
-        },
-        {
-            id: 2,
-            name: 'Hà Nội'
-        },
-        {
-            id: 3,
-            name: 'Đồng Nai'
-        }
-    ]
     const [modelData, setModelData] = useState({
         typeCurrency: [
             {
@@ -79,12 +62,6 @@ function TicketRequiredComponent(props) {
                 data: null,
                 checked: false
             },
-            {
-                id: 4,
-                name: 'KRW',
-                data: null,
-                checked: false
-            }
         ],
         relatedUser: [
             {
@@ -127,27 +104,40 @@ function TicketRequiredComponent(props) {
             </div>
             <div className='row p-2'>
                 <div className='col-md-11'>
+                    {
+                        id === null &&
+                        <div className="row">
+                            <div className="col-md-4">
+                                <span>Yêu cầu HTX</span>
+                                <SelectBox id="selectbox"
+                                    optionLabel="name"
+                                    optionValue="id"
+                                    onChange={(data) => {
+
+                                    }}
+                                    value={null}
+                                    isPortal
+                                    options={[]}
+                                />
+                            </div>
+                        </div>
+                    }
+
                     <div className="row">
                         <div className="col-md-4">
-                            <span>Mã ĐVKD yêu cầu</span>
+                            <span>Mã ĐVKD thực hiện</span>
                             <InputControl type="text" id="name" onChange={(e) => {
                                 const value = e.target.value ?? '';
                             }} defaultValue={null} />
                         </div>
                         <div className="col-md-4">
-                            <span>Tên ĐVKD yêu cầu</span>
+                            <span>Tên ĐVKD thực hiện</span>
                             <InputControl type="text" id="name" onChange={(e) => {
                                 const value = e.target.value ?? '';
                             }} defaultValue={null} />
                         </div>
                         <div className="col-md-4">
-                            <span>Tên yêu cầu</span>
-                            <InputControl type="text" id="name" onChange={(e) => {
-                                const value = e.target.value ?? '';
-                            }} defaultValue={null} />
-                        </div>
-                        <div className="col-md-4">
-                            <span>Ngày yêu cầu</span>
+                            <span>Ngày thực hiện</span>
                             <DateTimeInput selected={new Date()}
                                 isDefaultEmpty
                                 isPortal
@@ -155,8 +145,33 @@ function TicketRequiredComponent(props) {
 
                                 }} />
                         </div>
+                    </div>
+                    <div className='row'>
                         <div className="col-md-4">
-                            <span>Loại Yêu cầu</span>
+                            <span>Loại tiền</span>
+                            <GroupBoxComponent
+                                isShowTextBox={true}
+                                setData={setTypeCurrencyData}
+                                data={modelData.typeCurrency} />
+                        </div>
+                        <div className="col-md-4">
+                            <span>Chuyển thực thi</span>
+                            <GroupBoxComponent
+                                isShowTextBox={false}
+                                setData={setTypeRelatedUserData}
+                                data={modelData.relatedUser} />
+                        </div>
+                        <div className="col-md-4">
+                            <span>Mô tả</span>
+                            <InputControl rows={9} type="textarea" id="name" onChange={(e) => {
+                                const value = e.target.value ?? '';
+                            }} defaultValue={null} />
+                        </div>
+                    </div>
+
+                    <div className='row'>
+                        <div className="col-md-3">
+                            <span>Kiểm ngân</span>
                             <SelectBox id="selectbox"
                                 optionLabel="name"
                                 optionValue="id"
@@ -168,52 +183,47 @@ function TicketRequiredComponent(props) {
                                 options={[]}
                             />
                         </div>
-                        <div className="col-md-4">
-                            <span>Mô tả</span>
-                            <InputControl type="text" id="name" onChange={(e) => {
-                                const value = e.target.value ?? '';
-                            }} defaultValue={null} />
-                        </div>
-                    </div>
+                        <div className="col-md-3">
+                            <span>Tài xế</span>
+                            <SelectBox id="selectbox"
+                                optionLabel="name"
+                                optionValue="id"
+                                onChange={(data) => {
 
-                    <div className='row'>
-                        <div className="col-md-4">
-                            <span>Loại tiền</span>
-                            <GroupBoxComponent
-                                isShowTextBox={true}
-                                setData={setTypeCurrencyData}
-                                data={modelData.typeCurrency} />
+                                }}
+                                value={null}
+                                isPortal
+                                options={[]}
+                            />
                         </div>
-                        <div className="col-md-4">
+                        <div className="col-md-3">
+                            <span>Bảo vệ</span>
+                            <SelectBox id="selectbox"
+                                optionLabel="name"
+                                optionValue="id"
+                                onChange={(data) => {
+
+                                }}
+                                value={null}
+                                isPortal
+                                options={[]}
+                            />
+                        </div>
+                        <div className="col-md-3">
                             <span>Người liên quan</span>
-                            <GroupBoxComponent
-                                isShowTextBox={false}
-                                setData={setTypeRelatedUserData}
-                                data={modelData.relatedUser} />
-                        </div>
-                        <div className="col-md-4">
-                            <span>Chuyển thực thi</span>
-                            {
-                                masterData?.map(item => {
-                                    return (
-                                        <div class="form-check">
-                                            <input
-                                                type="radio"
-                                                class="form-check-input"
-                                                id={`radio_${item.id}`}
-                                                name={`thucthi_${id}`}
-                                            />
-                                            {item?.name}
-                                            <label class="form-check-label" for={`radio_${item.id}`}></label>
-                                        </div>
-                                    )
-                                })
-                            }
+                            <SelectBox id="selectbox"
+                                optionLabel="name"
+                                optionValue="id"
+                                onChange={(data) => {
+
+                                }}
+                                value={null}
+                                isPortal
+                                options={[]}
+                            />
                         </div>
                     </div>
-
                 </div>
-
                 <div className='col-md-1'>
                     <div className='toolbar'>
                         <div className='container-item'>
@@ -244,12 +254,6 @@ function TicketRequiredComponent(props) {
                 </div>
             </div>
             {
-                id &&
-                <>
-                    <ListFundRelaseBelongs id={id} />
-                </>
-            }
-            {
                 <Drawer
                     anchor={keyMenuFloat}
                     open={stateSlide[keyMenuFloat]}
@@ -263,4 +267,4 @@ function TicketRequiredComponent(props) {
     );
 }
 
-export default TicketRequiredComponent;
+export default VehicleReleaseContainer;
