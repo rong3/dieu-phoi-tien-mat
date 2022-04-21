@@ -59,7 +59,9 @@ function ListFundRelaseBelongs(props) {
                                 liClassName="tab-item"
                                 aClassName="tab-item_link"
                                 onSelected={(item) => {
-                                    setSelected(item)
+                                    setTimeout(() => {
+                                        setSelected(item)
+                                    }, 0);
                                 }}
                                 isFilter={false}
                                 listTag={masterData ?? []}

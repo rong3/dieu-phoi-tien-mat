@@ -29,12 +29,6 @@ function FundReleaseContainer(props) {
                 data: null,
                 checked: false
             },
-            {
-                id: 4,
-                name: 'KRW',
-                data: null,
-                checked: false
-            }
         ],
         relatedUser: [
             {
@@ -77,21 +71,25 @@ function FundReleaseContainer(props) {
             </div>
             <div className='row p-2'>
                 <div className='col-md-11'>
-                    <div className="row">
-                        <div className="col-md-4">
-                            <span>Yêu cầu tiếp/nộp quỹ</span>
-                            <SelectBox id="selectbox"
-                                optionLabel="name"
-                                optionValue="id"
-                                onChange={(data) => {
+                    {
+                        id === null &&
+                        <div className="row">
+                            <div className="col-md-4">
+                                <span>Yêu cầu tiếp/nộp quỹ</span>
+                                <SelectBox id="selectbox"
+                                    optionLabel="name"
+                                    optionValue="id"
+                                    onChange={(data) => {
 
-                                }}
-                                value={null}
-                                isPortal
-                                options={[]}
-                            />
+                                    }}
+                                    value={null}
+                                    isPortal
+                                    options={[]}
+                                />
+                            </div>
                         </div>
-                    </div>
+                    }
+
                     <div className="row">
                         <div className="col-md-4">
                             <span>Ngày yêu cầu</span>
@@ -216,21 +214,23 @@ function FundReleaseContainer(props) {
                 </div>
                 <div className='col-md-1'>
                     <div className='toolbar'>
-                        <div className='item'>
-                            <i className='fas fa-save text-info' title='Lưu'
-                                onClick={() => {
-                                    console.log({ modelData });
-                                }}
-                            >
-                            </i>
-                        </div>
-                        <div className='item'>
-                            <i className='fas fa-check text-success' title='Duyệt'>
-                            </i>
-                        </div>
-                        <div className='item'>
-                            <i className='fas fa-ban text-danger' title='Từ chối'>
-                            </i>
+                        <div className='container-item'>
+                            <div className='item'>
+                                <i className='fas fa-save text-info' title='Lưu'
+                                    onClick={() => {
+                                        console.log({ modelData });
+                                    }}
+                                >
+                                </i>
+                            </div>
+                            <div className='item'>
+                                <i className='fas fa-check text-success' title='Duyệt'>
+                                </i>
+                            </div>
+                            <div className='item'>
+                                <i className='fas fa-ban text-danger' title='Từ chối'>
+                                </i>
+                            </div>
                         </div>
                     </div>
                 </div>

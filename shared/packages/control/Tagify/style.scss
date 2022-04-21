@@ -1,8 +1,11 @@
 .custom-tag.active {
     p {
-        background: sandybrown !important;
+        background: #62bced !important;
         color: #fff !important;
     }
+}
+.list-tabs .tab-item_link.active {
+    background: #62bced;
 }
 
 .list-tabs {
@@ -29,7 +32,7 @@
     align-items: center;
     padding: 8px 16px;
     background: #fff9e2;
-    border-radius: 21px;
+    // border-radius: 21px;
     line-height: 23px;
     color: #333;
     -webkit-user-select: none;
@@ -37,8 +40,4 @@
     -ms-user-select: none;
     user-select: none;
     white-space: nowrap;
-}
-
-.list-tabs .tab-item_link.active {
-    background: sandybrown;
 }

@@ -20,21 +20,31 @@
     .toolbar {
         position: relative;
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         flex-wrap: wrap;
-        .item {
-            margin-top: 5px;
-            height: 30px;
-            width: 30px;
-            /* flex: 1 0 50%; */
-            border: 1px solid #bfe8ff;
-            margin-left: 60px;
-            i {
-                margin-left: 6px;
-            }
-            &:hover {
-                transform: scale(1.1);
-                transition: 0.3s ease-in-out all;
+        .container-item {
+            width: 50px;
+            height: 300px;
+            overflow: auto;
+            background: #f5f5f5;
+            border-radius: 5px;
+            margin: auto;
+            .item {
+                height: 30px;
+                width: 30px;
+                border: 1px solid #eee;
+                border-radius: 50%;
+                padding: 1px;
+                margin: 5px 0 0 8px;
+                top: 10px;
+                position: relative;
+                i {
+                    margin-left: 6px;
+                }
+                &:hover {
+                    transform: scale(1.1);
+                    transition: 0.3s ease-in-out all;
+                }
             }
         }
     }

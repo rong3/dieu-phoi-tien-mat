@@ -180,21 +180,23 @@ function TicketRequiredComponent(props) {
 
                 <div className='col-md-1'>
                     <div className='toolbar'>
-                        <div className='item'>
-                            <i className='fas fa-save text-info' title='Lưu'
-                                onClick={() => {
-                                    console.log({ modelData });
-                                }}
-                            >
-                            </i>
-                        </div>
-                        <div className='item'>
-                            <i className='fas fa-check text-success' title='Duyệt'>
-                            </i>
-                        </div>
-                        <div className='item'>
-                            <i className='fas fa-ban text-danger' title='Từ chối'>
-                            </i>
+                        <div className='container-item'>
+                            <div className='item'>
+                                <i className='fas fa-save text-info' title='Lưu'
+                                    onClick={() => {
+                                        console.log({ modelData });
+                                    }}
+                                >
+                                </i>
+                            </div>
+                            <div className='item'>
+                                <i className='fas fa-check text-success' title='Duyệt'>
+                                </i>
+                            </div>
+                            <div className='item'>
+                                <i className='fas fa-ban text-danger' title='Từ chối'>
+                                </i>
+                            </div>
                         </div>
                     </div>
                 </div>
