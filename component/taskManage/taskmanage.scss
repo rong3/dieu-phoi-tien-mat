@@ -1,3 +1,4 @@
+@import "./subcomponent/fund/component/listFundRelaseBelongs/style.scss";
 .priority-user-content {
     margin: 0 auto;
     .status-block {
@@ -13,7 +14,7 @@
         margin-left: 15px;
         &:hover {
             transform: scale(1.05);
-            transition: 0.3s ease-in-out all;   
+            transition: 0.3s ease-in-out all;
         }
     }
     .toolbar {
@@ -116,15 +117,15 @@
 }
 
 .priority-user-content .customers-box .list-customers .item-customer .left-box a .name {
-    color: white;
+    color: #fff;
     position: absolute;
     bottom: 0;
     left: 0;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     display: flex;
     align-items: center;
-    background: linear-gradient(360deg, #000000 -3.93%, rgba(0, 0, 0, 0) 50.15%);
+    background: linear-gradient(360deg, #000000 -3.93%, rgba(0, 0, 0, 0) 90.15%);
     filter: drop-shadow(0px 4px 24px rgba(0, 0, 0, 0.12));
     border-radius: 12px;
     width: 100%;

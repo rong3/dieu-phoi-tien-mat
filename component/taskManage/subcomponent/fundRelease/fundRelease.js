@@ -3,9 +3,9 @@ import { useRouter } from 'next/router'
 import DataGridControl from '../../../../shared/packages/control/grid/datagrid';
 import Modal from "../../../../shared/packages/control/modal/index";
 import TabControlCustom from "../../../../shared/packages/control/tabcontrol/index"
-import TicketRequiredComponent from "./component/ticketRequired/ticketRequiredComponent"
+import FundReleaseContainer from "./component/fundRelaseContainer/fundRelaseContainer"
 
-function FundComponent(props) {
+function FundReleaseComponent(props) {
     const router = useRouter();
     const [tabData, setTabData] = useState([])
     const [addData, setAddData] = useState({
@@ -20,7 +20,7 @@ function FundComponent(props) {
                 primary: false,
                 title: id ?? "Bản nháp",
                 key: 'tabPage',
-                children: <TicketRequiredComponent id={id} />
+                children: <FundReleaseContainer id={id} />
             }
         })
     }
@@ -38,16 +38,16 @@ function FundComponent(props) {
 
     const fakeData = [
         {
-            id: 'A012345678',
-            name: 'YC1',
+            id: 'LXQ0000001',
+            name: 'LXQ0000001',
+            ticketKey: 'YC1',
             date: '20/01/2022 13:00',
-            lxqquantity: 3
         },
         {
-            id: 'A01234577',
-            name: 'YC2',
+            id: 'LXQ0000002',
+            name: 'LXQ0000002',
+            ticketKey: 'YC1',
             date: '20/01/2022 13:00',
-            lxqquantity: 1
         }
     ]
     const renderActionGrid = (params) => {
@@ -66,7 +66,7 @@ function FundComponent(props) {
     const columns = [
         {
             field: 'id',
-            headerName: "Mã yêu cầu",
+            headerName: "Mã LXQ",
             headerClassName: 'headerColumn',
             flex: 1,
             editable: true,
@@ -79,13 +79,6 @@ function FundComponent(props) {
             }
         },
         {
-            field: 'name',
-            headerName: "Tên yêu cầu",
-            headerClassName: 'headerColumn',
-            flex: 1,
-            editable: true,
-        },
-        {
             field: 'date',
             headerName: "Ngày yêu cầu",
             headerClassName: 'headerColumn',
@@ -93,8 +86,8 @@ function FundComponent(props) {
             editable: true,
         },
         {
-            field: 'lxqquantity',
-            headerName: "Số lượng LXQ",
+            field: 'ticketKey',
+            headerName: "Yêu cầu tiếp/nộp quỹ",
             headerClassName: 'headerColumn',
             flex: 1,
             editable: true,
@@ -147,14 +140,14 @@ function FundComponent(props) {
             <div className="info-box">
                 <p className="name row">
                     <div className='col-md-6'>
-                        Tiếp/nộp quỹ
+                        Lệnh xuất quỹ
                     </div>
                     <div className='col-md-6'>
                         <div className='toolbar'>
                             <button className='btn btn-warning' onClick={() => {
                                 addTabData(null)
                             }}>
-                                Tạo yêu cầu
+                                Tạo lệnh xuất quỹ
                             </button>
                         </div>
                     </div>
@@ -176,4 +169,4 @@ function FundComponent(props) {
     );
 }
 
-export default FundComponent;
+export default FundReleaseComponent;

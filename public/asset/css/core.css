@@ -1052,7 +1052,7 @@ body {
 ::-webkit-scrollbar-thumb {
   border-radius: 3px;
   box-shadow: inset 0 0 6px rgba(255, 255, 255, 0);
-  background-color: #ffd643;
+  background-color: #63bcee;
 }
 
 html {

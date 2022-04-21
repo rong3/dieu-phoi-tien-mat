@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { map } from "jquery";
 import FundComponent from "./subcomponent/fund/fundComponent"
+import FundReleaseComponent from "./subcomponent/fundRelease/fundRelease"
 
 function TaskManageComponent(props) {
     const router = useRouter()
@@ -22,22 +22,28 @@ function TaskManageComponent(props) {
     const menuTab = [
         {
             key: 'fund',
-            title: "Tiếp/ Nộp quỹ",
+            title: "Yêu cầu Tiếp/Nộp quỹ",
             previewImg: 'https://img.etimg.com/thumb/msid-84727815,width-210,imgsize-41563,,resizemode-4,quality-100/is-investing-in-a-fund-of-funds-better-than-investing-in-a-mutual-fund.jpg',
             component: <FundComponent {...props} />
         },
         {
             key: 'vehicle',
-            title: "Hỗ trợ xe",
+            title: "Lệnh xuất quỹ",
+            previewImg: 'https://img.etimg.com/thumb/msid-84727815,width-210,imgsize-41563,,resizemode-4,quality-100/is-investing-in-a-fund-of-funds-better-than-investing-in-a-mutual-fund.jpg',
+            component: <FundReleaseComponent {...props} />
+        },
+        {
+            key: 'vehicle',
+            title: "Yêu cầu Hỗ trợ xe",
             previewImg: 'https://openapi.it/writable/uploads/1600353502_fd966fb5b68059423c68.jpg',
             component: null
         },
         {
             key: 'vehicle',
-            title: "Lệnh xuất quỹ",
-            previewImg: 'https://img.etimg.com/thumb/msid-84727815,width-210,imgsize-41563,,resizemode-4,quality-100/is-investing-in-a-fund-of-funds-better-than-investing-in-a-mutual-fund.jpg',
+            title: "Phiếu hỗ trợ xe",
+            previewImg: 'https://openapi.it/writable/uploads/1600353502_fd966fb5b68059423c68.jpg',
             component: null
-        }
+        },
     ]
 
     return (

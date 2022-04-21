@@ -44,6 +44,20 @@ export function InputControl({ editRef, defaultValue, handleSubmit, type, placeh
         }} value={value} />
     }
 
+    const rootInputTextArea = (value) => {
+        return <textarea
+            className="form-control muiInputBase-input-custom" cols={3} {...rest} onChange={(e) => {
+                const value = e.target.value;
+                if (value != inputValue) {
+                    setInputValue(value);
+                    if (rest.onChange) {
+                        rest.onChange(e)
+                    }
+                }
+            }} value={value} />
+    }
+
+
     const rootInputNumber = (value) => {
         return <input className="form-control muiInputBase-input-custom" {...rest} onChange={(e) => {
             const value = e.target.value;
@@ -119,6 +133,7 @@ export function InputControl({ editRef, defaultValue, handleSubmit, type, placeh
             case INPUT_TYPE.TEXT: return rootInputText(value);
             case INPUT_TYPE.NUMBER: return rootInputNumber(value);
             case INPUT_TYPE.PHONE: return rootInputTextPhone(value);
+            case INPUT_TYPE.TEXTAREA: return rootInputTextArea(value);
             default: return <></>
         }
     }

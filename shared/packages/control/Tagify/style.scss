@@ -1,0 +1,44 @@
+.custom-tag.active {
+    p {
+        background: sandybrown !important;
+        color: #fff !important;
+    }
+}
+
+.list-tabs {
+    cursor: pointer;
+    margin-left: 5px;
+    border: none;
+}
+
+.list-tabs .tab {
+    margin-bottom: 0;
+    padding-left: 0;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 10px;
+    overflow-x: auto;
+}
+
+.list-tabs .tab-item {
+    margin-right: 8px;
+}
+
+.list-tabs .tab-item_link {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    background: #fff9e2;
+    border-radius: 21px;
+    line-height: 23px;
+    color: #333;
+    -webkit-user-select: none;
+    -o-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.list-tabs .tab-item_link.active {
+    background: sandybrown;
+}
