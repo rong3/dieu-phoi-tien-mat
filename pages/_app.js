@@ -3,15 +3,15 @@ import React, { useState, useEffect } from "react";
 // Handle console logs
 import "../utils/dropConsole";
 // Styles
-import "fontsource-roboto";
+// import "fontsource-roboto";
 // ROUTER
 import { useRouter } from "next/router";
 // MUI Theme & SASS
 import { ThemeProvider, Button, createMuiTheme } from "@material-ui/core";
 // import { ThemeSwitch } from "components/ThemeSwitch";
 import { dark, light } from "../styles/muiTheme";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import "../shared/style/scss/style.scss"
+// import 'bootstrap/dist/css/bootstrap.min.css';
+// import "../shared/style/scss/style.scss"
 import "../styles/custom.scss"
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { ProvideAuth } from "../shared/packages/provider/authBase"
@@ -43,10 +43,9 @@ function Default({ Component, pageProps }) {
   }
 
   useEffect(() => {
-    loadLazyCSS('/asset/css/core.css');
-    loadLazyCSS('/asset/css/linearicons.css');
-    loadLazyCSS('/asset/css/material.css');
-    loadLazyCSS('/asset/css/font-be-vietnam.css');
+    loadLazyCSS('/asset/css/main.min.css');
+    loadLazyCSS('/asset/css/plugins.min.css');
+    loadLazyCSS('/asset/fonts/all.css');
   }, [])
 
 
@@ -62,8 +61,9 @@ function Default({ Component, pageProps }) {
 
   return (
     <ProvideAuth>
-      <Script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" />
-      <Script src="/asset/images/luckyspin/js/sweet_alert.min.js" strategy='beforeInteractive' />
+      {/* <Script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" /> */}
+      <Script src="/asset/js/plugins.min.js" strategy='beforeInteractive' />
+      <Script src="/asset/js/main.min.js" strategy='afterInteractive' />
       <AccessControlProvider>
         <I18nextProvider i18n={i18n}>
           <ToastProvider autoDismiss={true} autoDismissTimeout={2000} placement="bottom-right">
