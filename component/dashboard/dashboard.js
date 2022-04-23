@@ -1,6 +1,6 @@
 import React from "react";
 import { useRouter } from 'next/router'
-import { map } from "jquery";
+import ModalFancy from "../../shared/packages/control/modalFancy/index"
 
 function DashBoardComponent(props) {
     const router = useRouter()
@@ -211,42 +211,43 @@ function DashBoardComponent(props) {
                     </div>
                 </div>
             </section>
-            <div class="popup-detail popup-savedraft" id="popup-detail">
-                <div class="popup-header wide">
-                    <h2 class="title">Cập nhật yêu cầu</h2>
-                </div>
-                <div class="popup-main">
-                    <form class="wrap-form wide" action="">
-                        <div class="row">
-                            <div class="form-group col-lg-4">
-                                <label for="">Mã ĐVKD yêu cầu</label>
-                                <input class="form-control" type="text" value="0123456" disabled />
+            {
+                <ModalFancy
+                    idModal={"popup-detail"}
+                    title={"Cập nhật yêu cầu"}
+                    children={
+                        <form class="wrap-form wide" action="">
+                            <div class="row">
+                                <div class="form-group col-lg-4">
+                                    <label for="">Mã ĐVKD yêu cầu</label>
+                                    <input class="form-control" type="text" value="0123456" />
+                                </div>
+                                <div class="form-group col-lg-4">
+                                    <label for="">Ngày yêu cầu</label>
+                                    <input class="form-control" type="date" value="03/04/2022" placeholder="dd/mm/yyyy" />
+                                </div>
+                                <div class="form-group col-lg-4">
+                                    <label for="">Ưu tiên</label>
+                                    <select name="">
+                                        <option value="">&#128994; Thấp</option>
+                                        <option value="">&#128308; Khẩn cấp</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="form-group col-lg-4">
-                                <label for="">Ngày yêu cầu</label>
-                                <input class="form-control" type="date" value="03/04/2022" placeholder="dd/mm/yyyy" />
+                            <div class="row">
+                                <div class="form-group col-lg-12">
+                                    <label for="">Mô tả</label>
+                                    <input class="form-control" type="text" value="Mô tả" />
+                                </div>
                             </div>
-                            <div class="form-group col-lg-4">
-                                <label for="">Ưu tiên</label>
-                                <select name="">
-                                    <option value="">&#128994; Thấp</option>
-                                    <option value="">&#128308; Cao</option>
-                                </select>
+                            <div class="button-bottom">
+                                <button class="btn btn-handle">Lưu nháp</button>
+                                <button class="btn btn-done">Gửi duyệt</button>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="form-group col-lg-12">
-                                <label for="">Mô tả</label>
-                                <input class="form-control" type="text" value="Mô tả" />
-                            </div>
-                        </div>
-                        <div class="button-bottom">
-                            <button class="btn btn-handle">Lưu nháp</button>
-                            <button class="btn btn-done">Gửi duyệt</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+                        </form>
+                    }
+                />
+            }
             <a href="#" class="float" title="Tạo yêu cầu">
                 <i class="fa fa-plus my-float"></i>
             </a>
