@@ -5,46 +5,14 @@ import SelectBox from "../../../../../../shared/packages/control/selectBox/selec
 import { InputControl } from "../../../../../../shared/packages/control/input/inputControl"
 import DateTimeInput from "../../../../../../shared/packages/control/input/datetime"
 import ListFundRelaseBelongs from "../listFundRelaseBelongs/listFundRelaseBelongs"
-import {
-    Box,
-    Divider,
-    Drawer
-} from "@material-ui/core";
-import HistoryComponent from "../../../../../shared/history/history"
-
 
 function TicketRequiredComponent(props) {
     const { id } = props;
     const router = useRouter()
-    const keyMenuFloat = 'right';
-    const [stateSlide, setStateSlide] = React.useState({
-        top: false,
-        left: false,
-        bottom: false,
-        right: false,
-    });
 
-    const toggleDrawer = (open) => (event) => {
-        if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-            return;
-        }
-        setStateSlide({ ...stateSlide, [keyMenuFloat]: open });
-    };
+    useEffect(() => {
 
-    const closeSideBar = (open) => {
-        setStateSlide({ ...stateSlide, [keyMenuFloat]: open });
-    }
-
-    const list = (anchor) => (
-        <Box
-            sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 320 }}
-            role="presentation"
-        >
-            <HistoryComponent data={[]} />
-        </Box>
-    );
-
-
+    }, [])
     const masterData = [
         {
             id: 1,
@@ -79,12 +47,6 @@ function TicketRequiredComponent(props) {
                 data: null,
                 checked: false
             },
-            {
-                id: 4,
-                name: 'KRW',
-                data: null,
-                checked: false
-            }
         ],
         relatedUser: [
             {
@@ -119,13 +81,86 @@ function TicketRequiredComponent(props) {
     }
 
     return (
-        <section className="section priority-user-content">
-            <div className='row p-2'>
-                <span className='status-block'>
-                    {`Trạng thái: ${id ? 'Tiếp nhận' : 'Nháp'}`}
-                </span>
+        <>
+            <div className='row'>
+                <div class="form-group col-lg-4">
+                    <label for="">Ưu tiên</label>
+                    <select className='select-custom'>
+                        <option value="">&#128994; Thấp</option>
+                        <option value="">&#128308; Khẩn cấp</option>
+                    </select>
+                </div>
+                <div class="form-group col-lg-4">
+                    <label for="">Mã ĐVKD yêu cầu</label>
+                    <InputControl type="text" id="name" onChange={(e) => {
+                        const value = e.target.value ?? '';
+                    }} defaultValue={null} />
+                </div>
+                <div class="form-group col-lg-4">
+                    <label for="">Tên ĐVKD yêu cầu</label>
+                    <InputControl type="text" id="name" disabled />
+                </div>
+                <div class="form-group col-lg-4">
+                    <label for="">Tên yêu cầu</label>
+                    <InputControl type="text" id="name" />
+                </div>
+                <div class="form-group col-lg-4">
+                    <label for="">Ngày yêu cầu</label>
+                    <input class="form-control" type="date" value="03/04/2022" placeholder="dd/mm/yyyy" />
+                </div>
+                <div className="form-group col-lg-4">
+                    <label for="">Loại Yêu cầu</label>
+                    <select className='select-custom'>
+
+                    </select>
+                </div>
             </div>
-            <div className='row p-2'>
+            <div className='row'>
+                <div class="form-group col-lg-12">
+                    <label for="">Mô tả</label>
+                    <InputControl type="textarea" id="name" onChange={(e) => {
+                        const value = e.target.value ?? '';
+                    }} defaultValue={null} />
+                </div>
+                <div class="form-group col-lg-4">
+                    <label for="">Loại tiền</label>
+                    <GroupBoxComponent
+                        isShowTextBox={true}
+                        setData={setTypeCurrencyData}
+                        data={modelData.typeCurrency} />
+                </div>
+                <div class="form-group col-lg-4">
+                    <label for="">Người liên quan</label>
+                    <GroupBoxComponent
+                        isShowTextBox={false}
+                        setData={setTypeRelatedUserData}
+                        data={modelData.relatedUser} />
+                </div>
+                <div class="form-group col-lg-4">
+                    <label for="">Chuyển thực thi</label>
+                    {
+                        masterData?.map(item => {
+                            return (
+                                <div class="form-check">
+                                    <input
+                                        type="radio"
+                                        class="form-check-input"
+                                        id={`radio_${item.id}`}
+                                        name={`thucthi_${id}`}
+                                    />
+                                    &nbsp;{item?.name}
+                                    <label class="form-check-label" for={`radio_${item.id}`}></label>
+                                </div>
+                            )
+                        })
+                    }
+                </div>
+            </div>
+            <div class="button-bottom">
+                <button class="btn btn-draw" tabindex="0"><img src="/asset/images/icons/draw.svg" alt="" /><span>Lưu nháp</span></button>
+                <button class="btn btn-done" tabindex="0"> <img src="/asset/images/icons/send.svg" alt="" /><span>Tạo yêu cầu</span></button>
+            </div>
+            {/* <div className='row p-2'>
                 <div className='col-md-11'>
                     <div className="row">
                         <div className="col-md-4">
@@ -242,24 +277,14 @@ function TicketRequiredComponent(props) {
                         </div>
                     </div>
                 </div>
-            </div>
-            {
+            </div> */}
+            {/* {
                 id &&
                 <>
                     <ListFundRelaseBelongs id={id} />
                 </>
-            }
-            {
-                <Drawer
-                    anchor={keyMenuFloat}
-                    open={stateSlide[keyMenuFloat]}
-                    BackdropProps={{ invisible: true }}
-                    onClose={toggleDrawer(false)}
-                >
-                    {list(keyMenuFloat)}
-                </Drawer>
-            }
-        </section>
+            } */}
+        </>
     );
 }
 

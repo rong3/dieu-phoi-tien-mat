@@ -33,7 +33,7 @@ export function InputControl({ editRef, defaultValue, handleSubmit, type, placeh
     }, [defaultValue])
 
     const rootInputText = (value) => {
-        return <input className="form-control muiInputBase-input-custom" {...rest} onChange={(e) => {
+        return <input className="form-control" {...rest} onChange={(e) => {
             const value = e.target.value;
             if (value != inputValue) {
                 setInputValue(value);
@@ -46,7 +46,7 @@ export function InputControl({ editRef, defaultValue, handleSubmit, type, placeh
 
     const rootInputTextArea = (value) => {
         return <textarea
-            className="form-control muiInputBase-input-custom" cols={3} {...rest} onChange={(e) => {
+            className="form-control" cols={3} {...rest} onChange={(e) => {
                 const value = e.target.value;
                 if (value != inputValue) {
                     setInputValue(value);
@@ -59,7 +59,7 @@ export function InputControl({ editRef, defaultValue, handleSubmit, type, placeh
 
 
     const rootInputNumber = (value) => {
-        return <input className="form-control muiInputBase-input-custom" {...rest} onChange={(e) => {
+        return <input className="form-control" {...rest} onChange={(e) => {
             const value = e.target.value;
             if (value != inputValue) {
                 setInputValue(value);
@@ -71,7 +71,7 @@ export function InputControl({ editRef, defaultValue, handleSubmit, type, placeh
     }
 
     const rootInputTextPhone = (value) => {
-        return <input className="form-control muiInputBase-input-custom" {...rest} onChange={(e) => {
+        return <input className="form-control" {...rest} onChange={(e) => {
             const value = e.target.value;
             const regex = /^[0-9]+$/;
             if (rest.max) {

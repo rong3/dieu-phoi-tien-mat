@@ -6,9 +6,16 @@
     width: 100%;
     .item {
         width: 98%;
+        height: 45px;
         font-size: 14px;
         margin-top: 5px;
         padding: 5px;
-        border: 1px solid #bfe8ff;
+        border: 1px solid #eee;
+        .custom-chk {
+            width: 25px;
+            height: 20px;
+            /* position: relative; */
+            margin-top: 2px;
+        }
     }
 }

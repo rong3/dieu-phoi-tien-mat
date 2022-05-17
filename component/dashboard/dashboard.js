@@ -1,13 +1,165 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/router'
 import ModalFancy from "../../shared/packages/control/modalFancy/index"
+import Modal from "../../shared/packages/control/modal/index"
+import TaskContainerModal from "../taskManage/taskContainerModal"
+import DataGridControl from '../../shared/packages/control/grid/datagrid';
 
 function DashBoardComponent(props) {
     const router = useRouter()
-
     const changeRoute = (route) => {
         router.replace(route ?? "/")
     }
+    const setupModal = (type, data) => {
+        settingModal.type = type;
+        settingModal.data = data;
+        setSettingModal({ ...settingModal })
+    }
+
+    const [settingModal, setSettingModal] = useState({
+        isOpen: false,
+        category: null,
+        type: null,
+        data: null
+    })
+
+    const fakeData = [
+        {
+            id: 'YC0000001',
+            name: 'Tiếp quỹ A',
+            priority: 0,
+            status: 'InProgress',
+            ticketKey: 'YC1',
+            date: '20/01/2022 13:00',
+        },
+        {
+            id: 'YC0000002',
+            priority: 1,
+            status: 'Done',
+            name: 'Tiếp quỹ B',
+            ticketKey: 'YC1',
+            date: '20/01/2022 13:00',
+        }
+    ]
+    const renderActionGrid = (params) => {
+        return (
+            <div className="box-action-container">
+                <div className='item' onClick={() => {
+                    setSettingModal({ ...settingModal, isOpen: true })
+                }}>
+                    <i class="fas fa-edit text-edit"></i>
+                </div>
+            </div>
+        )
+    }
+
+    const priorityRender = (value) => {
+        switch (value) {
+            case 0: return <span class="dot green"> </span>;
+            case 1: return <span class="dot red"> </span>;
+            default: return null;
+        }
+    }
+
+    const statusRender = (value) => {
+        switch (value) {
+            case "InProgress": return <div class="status blue-3"> <span>Chờ hoàn tất</span></div>;
+            case "Done": return <div class="status orange-2"> <span>Bổ sung hồ sơ</span></div>;
+            default: return null;
+        }
+    }
+
+    const columns = [
+        {
+            field: 'id',
+            headerName: "Mã yêu cầu",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: true,
+            renderCell: (cell) => {
+                return <>
+                    <td>{priorityRender(cell?.row?.priority)}</td>
+                    &nbsp;
+                    &nbsp;
+                    <td onClick={() => {
+                        setSettingModal({ ...settingModal, isOpen: true })
+                    }}>
+                        <p>{cell?.row?.id}</p>
+                    </td>
+                </>
+            }
+        },
+        {
+            field: 'name',
+            headerName: "Tên yêu cầu",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: true,
+            renderCell: (cell) => {
+                return <td>
+                    <p>{cell?.row?.name}</p>
+                </td>
+
+            }
+        },
+        {
+            field: 'statusCode',
+            headerName: "Trạng thái",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: true,
+            renderCell: (cell) => {
+                return <td>
+                    {statusRender(cell?.row?.status)}
+                </td>
+            }
+        },
+        {
+            field: 'date',
+            headerName: "Ngày yêu cầu",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: true,
+            renderCell: (cell) => {
+                return <td>
+                    <div class="date-time"> <span>03/04/2022</span></div>
+                </td>
+            }
+        },
+        {
+            field: 'createdBy',
+            headerName: "Người tạo",
+            headerAlign: 'left',
+            headerClassName: 'headerColumn',
+            minWidth: 50,
+            flex: 1,
+            editable: true,
+            renderCell: (cell) => {
+                return <>
+                    <td>
+                        <div class="user-avatar">
+                            <img src="/asset/images/icons/avatar.png" alt="" />
+                        </div>
+                    </td>
+                    <td>
+                        <p>Nguyễn Văn A</p>
+                    </td>
+                </>
+            }
+        },
+        {
+            field: 'action',
+            headerName: 'Thao tác',
+            sortable: false,
+            headerClassName: 'headerColumn',
+            headerAlign: 'center',
+            flex: 1,
+            disableClickEventBubbling: true,
+            renderCell: (cell) => {
+                return renderActionGrid(cell?.row)
+            }
+        },
+    ];
 
     return (
         <>
@@ -59,25 +211,25 @@ function DashBoardComponent(props) {
                             <div class="d-flex align-items-center flex-wrap">
                                 <div class="wrapper-right_header--left d-flex align-items-center">
                                     <label class="txt" for="">Chủ đề / Loại yêu cầu </label>
-                                    <select>
-                                        <option value="hide"></option>
+                                    <select className='select-custom' defaultValue={"call"} onChange={() => {
+                                    }}>
                                         <option value="call">Yêu cầu Tiếp/nộp quỹ</option>
-                                        <option value="call">Lệnh xuất quỹ</option>
-                                        <option value="call">Yêu cầu Hỗ trợ xe</option>
-                                        <option value="call">Phiếu Hỗ trợ xe</option>
+                                        <option value="call2">Lệnh xuất quỹ</option>
+                                        <option value="call3">Yêu cầu Hỗ trợ xe</option>
+                                        <option value="call4">Phiếu Hỗ trợ xe</option>
                                     </select>
                                 </div>
                                 <div class="wrapper-right_header--right wrap-tabs d-flex align-items-center ms-auto">
                                     <div class="wrapper-right_header--right__select d-flex align-items-center">
                                         <div class="panel active" id="year">
-                                            <select>
+                                            <select className='select-custom'>
                                                 <option value="hide">Năm</option>
                                                 <option value="2022">2022</option>
                                                 <option value="2021">2021</option>
                                             </select>
                                         </div>
                                         <div class="panel" id="mounth">
-                                            <select>
+                                            <select className='select-custom'>
                                                 <option value="hide">Tháng</option>
                                                 <option value="january">Tháng 1</option>
                                                 <option value="february">Tháng 2</option>
@@ -90,7 +242,7 @@ function DashBoardComponent(props) {
                                     </ul>
                                 </div>
                             </div>
-                            <form class="wrap-form" action="">
+                            <form class="wrap-form">
                                 <div class="form-group">
                                     <button><img src="/asset/images/icons/search-black.svg" alt="" /></button>
                                     <input class="form-control" type="text" placeholder="Tìm kiếm" />
@@ -98,9 +250,17 @@ function DashBoardComponent(props) {
                             </form>
                         </div>
                         <div class="wrapper-right_body">
-                            <div class="wrap-table">
+                            <DataGridControl
+                                rows={fakeData}
+                                columns={columns}
+                                count={fakeData.length}
+                                disableSelectionOnClick
+                            />
+                            {/* <div class="wrap-table">
                                 <table>
-                                    <tr data-fancybox="popup" data-src="#popup-detail">
+                                    <tr onClick={() => {
+                                        setSettingModal({ ...settingModal, isOpen: true })
+                                    }}>
                                         <td> <span class="dot green"> </span></td>
                                         <td>
                                             <p>YC00001</p>
@@ -206,49 +366,37 @@ function DashBoardComponent(props) {
                                         </td>
                                     </tr>
                                 </table>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>
             </section>
-            {
+            {/* {
                 <ModalFancy
                     idModal={"popup-detail"}
-                    title={"Cập nhật yêu cầu"}
+                    title={modalData.type === 'new' ? "Tạo yêu cầu" : "Cập nhật yêu cầu"}
                     children={
-                        <form class="wrap-form wide" action="">
-                            <div class="row">
-                                <div class="form-group col-lg-4">
-                                    <label for="">Mã ĐVKD yêu cầu</label>
-                                    <input class="form-control" type="text" value="0123456" />
-                                </div>
-                                <div class="form-group col-lg-4">
-                                    <label for="">Ngày yêu cầu</label>
-                                    <input class="form-control" type="date" value="03/04/2022" placeholder="dd/mm/yyyy" />
-                                </div>
-                                <div class="form-group col-lg-4">
-                                    <label for="">Ưu tiên</label>
-                                    <select name="">
-                                        <option value="">&#128994; Thấp</option>
-                                        <option value="">&#128308; Khẩn cấp</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="form-group col-lg-12">
-                                    <label for="">Mô tả</label>
-                                    <input class="form-control" type="text" value="Mô tả" />
-                                </div>
-                            </div>
-                            <div class="button-bottom">
-                                <button class="btn btn-handle">Lưu nháp</button>
-                                <button class="btn btn-done">Gửi duyệt</button>
-                            </div>
-                        </form>
+                        <TaskContainerModal id={""} modalData={modalData} />
                     }
                 />
-            }
-            <a href="#" class="float" title="Tạo yêu cầu">
+            }*/}
+            <Modal
+                isOpen={settingModal.isOpen}
+                showCloseButton={true}
+                modalName="role-modal"
+                size={"md"}
+                showOverlay={true}
+                onClose={() => setSettingModal({ ...settingModal, isOpen: false })}
+                title={settingModal.type === 'new' ? "Tạo yêu cầu" : "Cập nhật yêu cầu"}
+                centered
+            >
+                <Modal.Body>
+                    <TaskContainerModal id={""} modalData={settingModal} />
+                </Modal.Body>
+            </Modal>
+            <a onClick={() => {
+                setSettingModal({ ...settingModal, type: 'new', isOpen: true })
+            }} class="float" title="Tạo yêu cầu">
                 <i class="fa fa-plus my-float"></i>
             </a>
         </>

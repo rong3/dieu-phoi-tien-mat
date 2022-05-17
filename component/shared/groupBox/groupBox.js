@@ -14,26 +14,31 @@ function GroupBoxComponent(props) {
                         <div className='item'>
                             <div class="form-check">
                                 <div className='row'>
-
-                                    <div className={isShowTextBox ? 'col-md-2' : 'col-md-12'}>
-                                        <input class="form-check-input"
-                                            type="checkbox"
-                                            id={item.id}
-                                            name={item.name}
-                                            onChange={(e) => {
-                                                const checked = e?.target?.checked;
-                                                item.checked = checked;
-                                                setData(data);
-                                            }}
-                                            checked={item.checked} />
-                                        <label class="form-check-label">
-                                            {item.name}
-                                        </label>
+                                    <div className={isShowTextBox ? 'form-group col-lg-3' : 'form-group col-lg-12'}>
+                                        <div className='row'>
+                                            <div className='form-group col-lg-4'>
+                                                <input class="form-check-input custom-chk"
+                                                    type="checkbox"
+                                                    id={item.id}
+                                                    name={item.name}
+                                                    onChange={(e) => {
+                                                        const checked = e?.target?.checked;
+                                                        item.checked = checked;
+                                                        setData(data);
+                                                    }}
+                                                    checked={item.checked} />
+                                            </div>
+                                            <div className='form-group col-lg-8'>
+                                                <label class="form-check-label">
+                                                    {item.name}
+                                                </label>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {
                                         isShowTextBox &&
-                                        <div className='col-md-10'>
+                                        <div className='form-group col-lg-9'>
                                             <InputControl disabled={!item.checked} type="number" id="name" onChange={(e) => {
                                                 const value = e.target.value ?? null;
                                                 item.data = value;

@@ -34,24 +34,28 @@ function Modal({ children, modalName, isOpen, size, className, centered, title, 
         }
       }}
     >
-      <div className="modal-content">
+      <div class="popup-detail popup-savedraft fancybox__content" id="popup-detail">
         {
-          props.hasHeader && <div className="modal-header dialog-header d-flex align-items-center">
-            <h3 className="modal-title">{title}</h3>
+          props.hasHeader && <div class="popup-header wide">
+            <h2 className="title">{title}
             {
               props.showCloseButton && <a onClick={onClose}>
-                <em className="fa fa-times"
+                <em style={{float: "right"}} className="fa fa-times pull-right"
                   role={"button"}>
                 </em>
               </a>
             }
+            </h2>
+           
           </div>
         }
-        {
-          React.Children.map(children, child => {
-            return child;
-          })
-        }
+        <div className="popup-main">
+          {
+            React.Children.map(children, child => {
+              return child;
+            })
+          }
+        </div>
       </div>
 
     </ReactModal>
