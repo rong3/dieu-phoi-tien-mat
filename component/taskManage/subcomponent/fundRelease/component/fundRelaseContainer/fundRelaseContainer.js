@@ -104,7 +104,7 @@ function FundReleaseContainer(props) {
                 <div className='form-group col-md-12'>
                     {
                         id === null &&
-                        <div className="row">
+                        <div className="form-row row">
                             <div className="col-md-4">
                                 <span>Yêu cầu tiếp/nộp quỹ</span>
                                 <SelectBox id="selectbox"

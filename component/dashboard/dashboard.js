@@ -1,30 +1,28 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/router'
-import ModalFancy from "../../shared/packages/control/modalFancy/index"
-import Modal from "../../shared/packages/control/modal/index"
-import TaskContainerModal from "../taskManage/taskContainerModal"
 import DataGridControl from '../../shared/packages/control/grid/datagrid';
 import DynamicLink from "../../component/common/DynamicLink/DynamicLink"
+import { TaskCategory } from "./common/taskContainer/taskCategory"
 
 function DashBoardComponent(props) {
     const router = useRouter()
     const changeRoute = (route) => {
         router.replace(route ?? "/")
     }
-    const setupModal = (type, data) => {
-        settingModal.type = type;
-        settingModal.data = data;
-        setSettingModal({ ...settingModal })
-    }
+
+    const [selectedData, setSelectedData] = useState({
+        category: TaskCategory.TIEPNOPQUY
+    })
 
     const [programData, setProgramData] = useState([
         {
             id: 1,
             name: 'Tạo yêu cầu',
-            quantity: 12,
+            quantity: null,
             icon: '/asset/images/icons/plus.svg',
             active: false,
             component: null,
+            classbg: 'bg-blue',
             href: '/document-board'
         },
         {
@@ -34,6 +32,7 @@ function DashBoardComponent(props) {
             icon: '/asset/images/icons/mail.svg',
             active: true,
             component: null,
+            classbg: 'bg-red',
             href: ""
         },
         {
@@ -43,6 +42,7 @@ function DashBoardComponent(props) {
             icon: '/asset/images/icons/mail-1.svg',
             active: false,
             component: null,
+            classbg: 'bg-green',
             href: ""
         },
         {
@@ -52,6 +52,7 @@ function DashBoardComponent(props) {
             icon: '/asset/images/icons/save-draft.svg',
             active: false,
             component: null,
+            classbg: '',
             href: ""
         },
         {
@@ -61,16 +62,10 @@ function DashBoardComponent(props) {
             icon: '/asset/images/icons/product-documents.svg',
             active: false,
             component: null,
+            classbg: 'bg-red',
             href: ""
         }
     ])
-
-    const [settingModal, setSettingModal] = useState({
-        isOpen: false,
-        category: null,
-        type: null,
-        data: null
-    })
 
     const fakeData = [
         {
@@ -93,11 +88,14 @@ function DashBoardComponent(props) {
     const renderActionGrid = (params) => {
         return (
             <div className="box-action-container">
-                <div className='item' onClick={() => {
-                    setSettingModal({ ...settingModal, isOpen: true })
-                }}>
-                    <i class="fas fa-edit text-edit"></i>
-                </div>
+                <DynamicLink
+                    href={`/document-board?id=${params?.id}&category=${selectedData.category}`}
+                    as={`/document-board?id=${params?.id}&category=${selectedData.category}`}
+                >
+                    <div className='item'>
+                        <i class="fas fa-edit text-edit"></i>
+                    </div>
+                </DynamicLink>
             </div>
         )
     }
@@ -124,17 +122,22 @@ function DashBoardComponent(props) {
             headerName: "Mã yêu cầu",
             headerClassName: 'headerColumn',
             flex: 1,
-            editable: true,
+            editable: false,
             renderCell: (cell) => {
                 return <>
                     <td>{priorityRender(cell?.row?.priority)}</td>
                     &nbsp;
                     &nbsp;
-                    <td onClick={() => {
-                        setSettingModal({ ...settingModal, isOpen: true })
-                    }}>
-                        <p>{cell?.row?.id}</p>
-                    </td>
+                    <DynamicLink
+                        href={`/document-board?id=${cell?.row?.id}&category=${selectedData.category}`}
+                        as={`/document-board?id=${cell?.row?.id}&category=${selectedData.category}`}
+                    >
+                        <a>
+                            <td>
+                                <p>{cell?.row?.id}</p>
+                            </td>
+                        </a>
+                    </DynamicLink>
                 </>
             }
         },
@@ -143,7 +146,7 @@ function DashBoardComponent(props) {
             headerName: "Tên yêu cầu",
             headerClassName: 'headerColumn',
             flex: 1,
-            editable: true,
+            editable: false,
             renderCell: (cell) => {
                 return <td>
                     <p>{cell?.row?.name}</p>
@@ -156,7 +159,7 @@ function DashBoardComponent(props) {
             headerName: "Trạng thái",
             headerClassName: 'headerColumn',
             flex: 1,
-            editable: true,
+            editable: false,
             renderCell: (cell) => {
                 return <td>
                     {statusRender(cell?.row?.status)}
@@ -168,7 +171,7 @@ function DashBoardComponent(props) {
             headerName: "Ngày yêu cầu",
             headerClassName: 'headerColumn',
             flex: 1,
-            editable: true,
+            editable: false,
             renderCell: (cell) => {
                 return <td>
                     <div class="date-time"> <span>03/04/2022</span></div>
@@ -182,7 +185,7 @@ function DashBoardComponent(props) {
             headerClassName: 'headerColumn',
             minWidth: 50,
             flex: 1,
-            editable: true,
+            editable: false,
             renderCell: (cell) => {
                 return <>
                     <td>
@@ -221,7 +224,7 @@ function DashBoardComponent(props) {
                                     return (
                                         <li class={`${item?.active ? 'active' : ''}`}>
                                             <DynamicLink href={item?.href} as={item?.href}>
-                                                <a class="wrapper-content bg-red d-flex align-items-center">
+                                                <a class={`wrapper-content ${item?.classbg} d-flex align-items-center`}>
                                                     <div class="icon">
                                                         <img src={item?.icon} alt="" /></div>
                                                     <p class="title-item">
@@ -267,13 +270,15 @@ function DashBoardComponent(props) {
                         <div class="wrapper-right_header">
                             <div class="d-flex align-items-center flex-wrap">
                                 <div class="wrapper-right_header--left d-flex align-items-center">
-                                    <label class="txt" for="">Chủ đề / Loại yêu cầu </label>
-                                    <select className='select-custom' defaultValue={"call"} onChange={() => {
+                                    <label class="txt" for="">Chủ đề/Loại yêu cầu </label>
+                                    <select className='select-custom' defaultValue={selectedData.category} onChange={(e) => {
+                                        selectedData.category = e?.target?.value ?? TaskCategory.TIEPNOPQUY;
+                                        setSelectedData({ ...selectedData })
                                     }}>
-                                        <option value="call">Yêu cầu Tiếp/nộp quỹ</option>
-                                        <option value="call2">Lệnh xuất quỹ</option>
-                                        <option value="call3">Yêu cầu Hỗ trợ xe</option>
-                                        <option value="call4">Phiếu Hỗ trợ xe</option>
+                                        <option value={TaskCategory.TIEPNOPQUY}>Tiếp/nộp quỹ</option>
+                                        <option value={TaskCategory.LENHXUATQUY}>Lệnh xuất quỹ</option>
+                                        <option value={TaskCategory.HOTROXE}>Yêu cầu Hỗ trợ xe</option>
+                                        <option value={TaskCategory.PHIEUHOTROXE}>Phiếu Hỗ trợ xe</option>
                                     </select>
                                 </div>
                                 <div class="wrapper-right_header--right wrap-tabs d-flex align-items-center ms-auto">
@@ -317,29 +322,6 @@ function DashBoardComponent(props) {
                     </div>
                 </div>
             </section>
-            {/* {
-                <ModalFancy
-                    idModal={"popup-detail"}
-                    title={modalData.type === 'new' ? "Tạo yêu cầu" : "Cập nhật yêu cầu"}
-                    children={
-                        <TaskContainerModal id={""} modalData={modalData} />
-                    }
-                />
-            }*/}
-            <Modal
-                isOpen={settingModal.isOpen}
-                showCloseButton={true}
-                modalName="role-modal"
-                size={"md"}
-                showOverlay={true}
-                onClose={() => setSettingModal({ ...settingModal, isOpen: false })}
-                title={settingModal.type === 'new' ? "Tạo yêu cầu" : "Cập nhật yêu cầu"}
-                centered
-            >
-                <Modal.Body>
-                    <TaskContainerModal id={""} modalData={settingModal} />
-                </Modal.Body>
-            </Modal>
             <a onClick={() => {
                 setSettingModal({ ...settingModal, type: 'new', isOpen: true })
             }} class="float" title="Tạo yêu cầu">
