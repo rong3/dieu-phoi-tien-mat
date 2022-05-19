@@ -10,7 +10,7 @@ function HomePage() {
   return (
     <React.Fragment>
       <Head>
-        <title>{t('mainMenu.dashboard')}</title>
+        <title>Điều phối tiền mặt</title>
       </Head>
       <DashBoardComponent />
     </React.Fragment>

@@ -322,11 +322,11 @@ function DashBoardComponent(props) {
                     </div>
                 </div>
             </section>
-            <a onClick={() => {
+            {/* <a onClick={() => {
                 setSettingModal({ ...settingModal, type: 'new', isOpen: true })
             }} class="float" title="Tạo yêu cầu">
                 <i class="fa fa-plus my-float"></i>
-            </a>
+            </a> */}
         </>
     );
 }

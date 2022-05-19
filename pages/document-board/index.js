@@ -10,7 +10,7 @@ function DocumentBoardPage(props) {
     return (
         <React.Fragment>
             <Head>
-                <title>{t('mainMenu.dashboard')}</title>
+                <title>Điều phối tiền mặt</title>
             </Head>
             <ContainerComponent {...props} />
         </React.Fragment>

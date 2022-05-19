@@ -86,8 +86,9 @@ function TicketRequiredComponent(props) {
                 <div class="form-group col-lg-4">
                     <label for="">Ưu tiên</label>
                     <select className='select-custom'>
-                        <option value="">&#128994; Thấp</option>
-                        <option value="">&#128308; Khẩn cấp</option>
+                        <option value="low">&#128994; Thấp</option>
+                        <option value="normal">&#128993; Bình thường</option>
+                        <option value="high">&#128308; Khẩn cấp</option>
                     </select>
                 </div>
                 <div class="form-group col-lg-4">
@@ -106,13 +107,25 @@ function TicketRequiredComponent(props) {
                 </div>
                 <div class="form-group col-lg-4">
                     <label for="">Ngày yêu cầu</label>
-                    <input class="form-control" type="date" value="03/04/2022" placeholder="dd/mm/yyyy" />
+                    <DateTimeInput selected={new Date()}
+                        isDefaultEmpty
+                        isPortal
+                        id="startDate" isOnlyDate={false} onChange={(data) => {
+
+                        }} />
                 </div>
                 <div className="form-group col-lg-4">
                     <label for="">Loại Yêu cầu</label>
-                    <select className='select-custom'>
+                    <SelectBox id="selectbox"
+                        optionLabel="name"
+                        optionValue="id"
+                        onChange={(data) => {
 
-                    </select>
+                        }}
+                        value={null}
+                        isPortal
+                        options={[]}
+                    />
                 </div>
             </div>
             <div className='form-row row'>
