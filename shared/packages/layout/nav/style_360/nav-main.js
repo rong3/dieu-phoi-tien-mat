@@ -129,8 +129,19 @@ function NavBarStyle360(props) {
                                     </div>
                                 </div>
                             </li>
-                            <li class="nav-item"> <a class="logout" href=""> <img src="/asset/images/icons/logout.svg" alt="" /></a></li>
+                            <li class="nav-item"> <a class="logout" onClick={() => {
+                                auth.signout().then((res) => {
+                                    setTimeout(() => {
+                                        router.push("/login");
+                                    }, 2000);
+                                });
+                            }}>
+                                <img src="/asset/images/icons/logout.svg" alt="" />
+                            </a></li>
                         </ul>
+                    </div>
+                    <div class="menu-toggle d-flex align-items-center">
+                        <div class="btn btn-hamburger-lines"><span> </span><span> </span><span> </span><span></span></div>
                     </div>
                 </div>
             </div>
