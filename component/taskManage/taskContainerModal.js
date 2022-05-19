@@ -23,7 +23,7 @@ function TaskContainerModal(props) {
         <form class="wrap-form wide">
             {
                 modalData?.type === 'new' &&
-                <div className='row'>
+                <div className='form-row row'>
                     <div class="form-group col-lg-4">
                         <label for="category">Danh mục</label>
                         <select id="category" className='select-custom' defaultValue={selectedType} onChange={(e) => {

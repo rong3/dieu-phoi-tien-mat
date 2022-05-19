@@ -95,13 +95,13 @@ function FundReleaseContainer(props) {
 
     return (
         <section className="section priority-user-content">
-            <div className='row p-2'>
+            <div className='row'>
                 <span className='status-block'>
                     {`Trạng thái: ${id ? 'Tiếp nhận' : 'Nháp'}`}
                 </span>
             </div>
-            <div className='row p-2'>
-                <div className='col-md-11'>
+            <div className='form-row row'>
+                <div className='form-group col-md-12'>
                     {
                         id === null &&
                         <div className="row">
@@ -121,8 +121,8 @@ function FundReleaseContainer(props) {
                         </div>
                     }
 
-                    <div className="row">
-                        <div className="col-md-4">
+                    <div className="form-row row">
+                        <div className="form-group col-md-4">
                             <span>Ngày yêu cầu</span>
                             <DateTimeInput selected={new Date()}
                                 isDefaultEmpty
@@ -131,7 +131,7 @@ function FundReleaseContainer(props) {
 
                                 }} />
                         </div>
-                        <div className="col-md-4">
+                        <div className="form-group col-md-4">
                             <span>Mã ĐVKD yêu cầu</span>
                             <InputControl type="text" id="name" onChange={(e) => {
                                 const value = e.target.value ?? '';
@@ -165,7 +165,7 @@ function FundReleaseContainer(props) {
                             }} defaultValue={null} />
                         </div>
                     </div>
-                    <div className='row'>
+                    <div className='form-row row'>
                         <div className="col-md-4">
                             <span>Loại tiền</span>
                             <GroupBoxComponent
@@ -187,8 +187,7 @@ function FundReleaseContainer(props) {
                             }} defaultValue={null} />
                         </div>
                     </div>
-
-                    <div className='row'>
+                    <div className='form-row row'>
                         <div className="col-md-3">
                             <span>Kiểm ngân</span>
                             <SelectBox id="selectbox"
@@ -243,45 +242,7 @@ function FundReleaseContainer(props) {
                         </div>
                     </div>
                 </div>
-                <div className='col-md-1'>
-                    <div className='toolbar'>
-                        <div className='container-item'>
-                            <div className='item'>
-                                <i className='fas fa-history' title='Lịch sử'
-                                    onClick={toggleDrawer(!stateSlide[keyMenuFloat])}
-                                >
-                                </i>
-                            </div>
-                            <div className='item'>
-                                <i className='fas fa-save text-info' title='Lưu'
-                                    onClick={() => {
-                                        console.log({ modelData });
-                                    }}
-                                >
-                                </i>
-                            </div>
-                            <div className='item'>
-                                <i className='fas fa-check text-success' title='Duyệt'>
-                                </i>
-                            </div>
-                            <div className='item'>
-                                <i className='fas fa-ban text-danger' title='Từ chối'>
-                                </i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
-            {
-                <Drawer
-                    anchor={keyMenuFloat}
-                    open={stateSlide[keyMenuFloat]}
-                    BackdropProps={{ invisible: true }}
-                    onClose={toggleDrawer(false)}
-                >
-                    {list(keyMenuFloat)}
-                </Drawer>
-            }
         </section>
     );
 }
