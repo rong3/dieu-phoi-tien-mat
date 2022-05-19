@@ -82,7 +82,7 @@ function TicketRequiredComponent(props) {
 
     return (
         <>
-            <div className='row'>
+            <div className='form-row row'>
                 <div class="form-group col-lg-4">
                     <label for="">Ưu tiên</label>
                     <select className='select-custom'>
@@ -115,7 +115,7 @@ function TicketRequiredComponent(props) {
                     </select>
                 </div>
             </div>
-            <div className='row'>
+            <div className='form-row row'>
                 <div class="form-group col-lg-12">
                     <label for="">Mô tả</label>
                     <InputControl type="textarea" id="name" onChange={(e) => {

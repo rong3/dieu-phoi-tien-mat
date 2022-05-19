@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { masterConfig } from "../../../../../config/master"
 import { useAuth } from "../../../provider/authBase"
 import { useRouter } from 'next/router'
+import DynamicLink from "../../../../../component/common/DynamicLink/DynamicLink"
 
 function NavBarStyle360(props) {
     const auth = useAuth();
@@ -11,9 +12,15 @@ function NavBarStyle360(props) {
         <header>
             <div class="wrap-header d-flex align-items-center">
                 <div class="wrap-header-left d-flex align-items-center"><a class="wrap-header-left_icon d-flex align-items-center justify-content-center" href=""> <img src="/asset/images/icons/icons-windows.svg" alt="" /></a>
-                    <h1> <a class="wrap-header-left_logo" href="/"><img src="/asset/images/logo.png" alt="" /></a></h1>
+                    <h1>
+                        <DynamicLink href="/" as="/">
+                            <a class="wrap-header-left_logo">
+                                <img src="/asset/images/logo.png" alt="" />
+                            </a>
+                        </DynamicLink>
+                    </h1>
                 </div>
-                <div class="wrap-header-center" style={{background:"none"}}>
+                <div class="wrap-header-center" style={{ background: "none" }}>
 
                 </div>
                 <div class="wrap-header-right d-flex align-items-center">

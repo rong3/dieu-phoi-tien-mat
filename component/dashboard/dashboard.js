@@ -4,6 +4,7 @@ import ModalFancy from "../../shared/packages/control/modalFancy/index"
 import Modal from "../../shared/packages/control/modal/index"
 import TaskContainerModal from "../taskManage/taskContainerModal"
 import DataGridControl from '../../shared/packages/control/grid/datagrid';
+import DynamicLink from "../../component/common/DynamicLink/DynamicLink"
 
 function DashBoardComponent(props) {
     const router = useRouter()
@@ -15,6 +16,54 @@ function DashBoardComponent(props) {
         settingModal.data = data;
         setSettingModal({ ...settingModal })
     }
+
+    const [programData, setProgramData] = useState([
+        {
+            id: 1,
+            name: 'Tạo yêu cầu',
+            quantity: 12,
+            icon: '/asset/images/icons/plus.svg',
+            active: false,
+            component: null,
+            href: '/document-board'
+        },
+        {
+            id: 2,
+            name: 'Yêu cầu đến',
+            quantity: 12,
+            icon: '/asset/images/icons/mail.svg',
+            active: true,
+            component: null,
+            href: ""
+        },
+        {
+            id: 3,
+            name: 'Yêu cầu đi',
+            quantity: 12,
+            icon: '/asset/images/icons/mail-1.svg',
+            active: false,
+            component: null,
+            href: ""
+        },
+        {
+            id: 4,
+            name: 'Yêu cầu nháp',
+            quantity: 12,
+            icon: '/asset/images/icons/save-draft.svg',
+            active: false,
+            component: null,
+            href: ""
+        },
+        {
+            id: 5,
+            name: 'Yêu cầu liên quan',
+            quantity: 12,
+            icon: '/asset/images/icons/product-documents.svg',
+            active: false,
+            component: null,
+            href: ""
+        }
+    ])
 
     const [settingModal, setSettingModal] = useState({
         isOpen: false,
@@ -167,19 +216,27 @@ function DashBoardComponent(props) {
                 <div class="wrapper-container">
                     <div class="tabs-menu">
                         <ul class="tab-list d-flex align-items-center">
-                            <li class="active"><a class="wrapper-content bg-red d-flex align-items-center" href="#">
-                                <div class="icon"> <img src="/asset/images/icons/mail.svg" alt="" /></div>
-                                <p class="title-item">Yêu cầu đến<span>12</span></p>
-                                <div class="arrow d-flex align-items-center"> <em class="material-icons">chevron_right</em></div></a></li>
-                            <li><a class="wrapper-content bg-blue d-flex align-items-center" href="#">
-                                <div class="icon"> <img src="/asset/images/icons/mail-1.svg" alt="" /></div>
-                                <p class="title-item">Yêu cầu đi<span>95</span></p>
-                                <div class="arrow d-flex align-items-center"> <em class="material-icons">chevron_right</em></div></a></li>
-                            <li><a class="wrapper-content bg-green d-flex align-items-center" href="#">
-                                <div class="icon"> <img src="/asset/images/icons/save-draft.svg" alt="" /></div>
-                                <p class="title-item">Lưu nháp<span>03</span></p>
-                                <div class="arrow d-flex align-items-center"> <em class="material-icons">chevron_right</em></div></a></li>
-
+                            {
+                                programData?.map((item, index) => {
+                                    return (
+                                        <li class={`${item?.active ? 'active' : ''}`}>
+                                            <DynamicLink href={item?.href} as={item?.href}>
+                                                <a class="wrapper-content bg-red d-flex align-items-center">
+                                                    <div class="icon">
+                                                        <img src={item?.icon} alt="" /></div>
+                                                    <p class="title-item">
+                                                        {item?.name}
+                                                        <span>{item?.quantity}</span>
+                                                    </p>
+                                                    <div class="arrow d-flex align-items-center">
+                                                        <em class="material-icons">chevron_right</em>
+                                                    </div>
+                                                </a>
+                                            </DynamicLink>
+                                        </li>
+                                    )
+                                })
+                            }
                         </ul>
                     </div>
                 </div>

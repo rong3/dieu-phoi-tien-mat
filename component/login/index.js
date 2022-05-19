@@ -56,46 +56,75 @@ const Login = () => {
     };
 
     return (
-        <>
+        <section class="login-bg">
             {
-                auth.isAuthenticated ||
-                <section className="row flexbox-container">
-                    <div className="col-12 d-flex align-items-center justify-content-center">
-                        <div className="row">
-                            <div className="col-md-12">
-                                <span>Email</span>
-                                <input className="form-control" type="text" onChange={(e) => {
-                                    const value = e?.target?.value;
-                                    credential.email = value;
-                                    setCredential({ ...credential });
-                                }} />
-
+                isLoading ?
+                    <div id="loading-container">
+                        <div class="loading-wrapper">
+                            <div id="loading-logo">
+                                <div class="loading-spinner-rolling">
+                                    <div class="ldio">
+                                        <div></div>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="col-md-12">
-                                <span>Pass</span>
-                                <input className="form-control" type="password" onChange={(e) => {
-                                    const value = e?.target?.value;
-                                    credential.password = value;
-                                    setCredential({ ...credential });
-                                }} />
-                            </div>
-                            <div className="col-md-12">
-                                <br />
-                                <LoadingButton className="btn btn-info" isLoading={isLoading} onClick={login}>Log in</LoadingButton>
+                            <div class="progress-status">Đang đăng nhập</div>
+                        </div>
+                    </div>
+                    :
+                    <div class="wrapper-container d-flex align-items-center">
+                        <div class="wrapper-left">
+                            <div class="logo"> <a href=""><img src="/asset/images/logo.png" alt="" /></a></div>
+                            <div class="img-bg"><img src="/asset/images/login-bg.png" alt="" /></div>
+                        </div>
+                        <div class="wrapper-right">
+                            <div class="wrapper-content">
+                                <div class="wrap-header d-flex">
+                                    <div class="title-login">
+                                        <h1>Điều phối tiền mặt</h1>
+                                    </div>
+                                </div>
+                                <form class="wrap-form">
+                                    <div class="form-group d-flex">
+                                        <label for="">Tên Đăng Nhập</label>
+                                        <input class="form-control" type="text" onChange={(e) => {
+                                            const value = e?.target?.value;
+                                            credential.email = value;
+                                            setCredential({ ...credential });
+                                        }}
+                                            onKeyPress={event => {
+                                                if (event.key === 'Enter') {
+                                                    login();
+                                                }
+                                            }}
+                                            placeholder="Nhập tên user" />
+                                    </div>
+                                    <div class="form-group d-flex">
+                                        <label for="">Nhập Mật khẩu</label>
+                                        <input class="form-control" type="password" placeholder="Nhập mật khẩu"
+                                            onChange={(e) => {
+                                                const value = e?.target?.value;
+                                                credential.password = value;
+                                                setCredential({ ...credential });
+                                            }}
+                                            onKeyPress={event => {
+                                                if (event.key === 'Enter') {
+                                                    login();
+                                                }
+                                            }}
+                                        />
+                                        <img class="icon" src="/asset/images/icons/eye.svg" alt="" />
+                                    </div>
+                                    <button class="btn btn-submit" onClick={login} type="button">
+                                        <span>Đăng Nhập</span>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
-                </section>
             }
-            {
-                auth.isAuthenticated &&
-                <section className="row flexbox-container">
-                    <div className="col-12 d-flex align-items-center justify-content-center">
-                        <span>Đang đăng nhập...</span>
-                    </div>
-                </section>
-            }
-        </>
+
+        </section>
     );
 }
 
