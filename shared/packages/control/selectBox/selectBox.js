@@ -224,7 +224,7 @@ const SelectBox = ({ defaultValue, value, onChange: onChangeCallback, onBlur: on
             ...provided,
             height: '36px',
             padding: '0 6px',
-            fontSize: '13px'
+            fontSize: '15px'
         }),
 
         input: (provided, state) => ({
@@ -304,7 +304,7 @@ SelectBox.propTypes = {
 
 SelectBox.defaultProps = {
     options: [],
-    placeholder: "select",
+    placeholder: "Chọn dữ liệu",
     optionLabel: 'label',
     optionValue: 'value',
     error: false,

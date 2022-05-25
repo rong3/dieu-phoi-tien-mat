@@ -7,21 +7,17 @@ import { combineReducers } from "redux";
 import { appReducer } from "./appReducer";
 import { userReducer } from "./userReducer";
 import fetchDataReducer from "./fetchDataReducer"
-import strategyReducer from "./strategyReducer"
-import wheelInstanceReducer from "./wheelInstanceReducer"
-import themeInstanceReducer from "./themeInstanceReducer"
-import groupAllocationReducer from "./groupAllocationReducer"
-import masterObjectAllocationReducer from "./masterObjectAllocationReducer"
-import groupChannelPrizeReducer from "./groupChannelPrizeReducer"
+// import strategyReducer from "./strategyReducer"
+// import wheelInstanceReducer from "./wheelInstanceReducer"
+// import themeInstanceReducer from "./themeInstanceReducer"
+// import groupAllocationReducer from "./groupAllocationReducer"
+// import masterObjectAllocationReducer from "./masterObjectAllocationReducer"
+// import groupChannelPrizeReducer from "./groupChannelPrizeReducer"
+import masterDataReducer from "./masterDataReducer"
 
 export const rootReducer = combineReducers({
     app: appReducer,
     user: userReducer,
     fetchData: fetchDataReducer,
-    strategy: strategyReducer,
-    wheelInstance: wheelInstanceReducer,
-    themeInstance: themeInstanceReducer,
-    groupAllocation: groupAllocationReducer,
-    masterObjectAllocation: masterObjectAllocationReducer,
-    groupChannelPrize: groupChannelPrizeReducer
+    masterData: masterDataReducer
 })

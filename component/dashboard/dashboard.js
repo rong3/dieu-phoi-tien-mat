@@ -2,17 +2,69 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/router'
 import DataGridControl from '../../shared/packages/control/grid/datagrid';
 import DynamicLink from "../../component/common/DynamicLink/DynamicLink"
-import { TaskCategory } from "./common/taskContainer/taskCategory"
+import { TaskCategory, TypeCategory } from "./common/taskContainer/taskCategory"
+import { GetYCTiepNopQuy } from "../../services/dptm/yeucautiepnopquy"
+import { GetLXQ } from "../../services/dptm/lenhxuatquy"
+import { useDispatch, useSelector } from "react-redux";
 
 function DashBoardComponent(props) {
     const router = useRouter()
     const changeRoute = (route) => {
         router.replace(route ?? "/")
     }
-
     const [selectedData, setSelectedData] = useState({
-        category: TaskCategory.TIEPNOPQUY
+        category: TaskCategory.TIEPNOPQUY,
+        typeCategory: TypeCategory.YCDEN
     })
+
+    const [componentData, setComponentData] = useState({
+        datagrid: []
+    })
+
+    const { masterData } = useSelector((state) => state.masterData);
+
+    useEffect(() => {
+        selectedData.category = null;
+        selectedData.typeCategory = null;
+        setSelectedData({ ...selectedData })
+        setTimeout(() => {
+            selectedData.category = TaskCategory.TIEPNOPQUY;
+            selectedData.typeCategory = TypeCategory.YCDEN;
+            setSelectedData({ ...selectedData })
+        }, 0);
+    }, [])
+
+    useEffect(() => {
+        if (selectedData.category === TaskCategory.TIEPNOPQUY) {
+            GetYCTiepNopQuy().then((res) => {
+                console.log({ res });
+                componentData.datagrid = res?.data ?? [];
+                setComponentData({ ...componentData })
+            }).catch((err) => {
+                console.log({ err });
+            })
+        }
+        if (selectedData.category === TaskCategory.LENHXUATQUY) {
+            GetLXQ().then((res) => {
+                console.log({ res });
+                componentData.datagrid = res?.data ?? [];
+                setComponentData({ ...componentData })
+            }).catch((err) => {
+                console.log({ err });
+            })
+        }
+        else {
+            componentData.datagrid = [];
+            setComponentData({ ...componentData })
+        }
+    }, [selectedData])
+
+    useEffect(() => {
+        if (router?.query?.typeCategory) {
+            selectedData.typeCategory = router?.query?.typeCategory;
+            setSelectedData({ ...selectedData })
+        }
+    }, [router?.query])
 
     const [programData, setProgramData] = useState([
         {
@@ -21,6 +73,7 @@ function DashBoardComponent(props) {
             quantity: null,
             icon: '/asset/images/icons/plus.svg',
             active: false,
+            typeCategory: TypeCategory.TAOYC,
             component: null,
             classbg: 'bg-blue',
             href: '/document-board'
@@ -30,10 +83,11 @@ function DashBoardComponent(props) {
             name: 'Yêu cầu đến',
             quantity: 12,
             icon: '/asset/images/icons/mail.svg',
-            active: true,
+            active: false,
+            typeCategory: TypeCategory.YCDEN,
             component: null,
             classbg: 'bg-red',
-            href: ""
+            href: `/?typeCategory=${TypeCategory.YCDEN}`
         },
         {
             id: 3,
@@ -41,9 +95,10 @@ function DashBoardComponent(props) {
             quantity: 12,
             icon: '/asset/images/icons/mail-1.svg',
             active: false,
+            typeCategory: TypeCategory.YCDI,
             component: null,
             classbg: 'bg-green',
-            href: ""
+            href: `/?typeCategory=${TypeCategory.YCDI}`
         },
         {
             id: 4,
@@ -51,9 +106,10 @@ function DashBoardComponent(props) {
             quantity: 12,
             icon: '/asset/images/icons/save-draft.svg',
             active: false,
+            typeCategory: TypeCategory.YCNHAP,
             component: null,
             classbg: '',
-            href: ""
+            href: `/?typeCategory=${TypeCategory.YCNHAP}`
         },
         {
             id: 5,
@@ -61,30 +117,13 @@ function DashBoardComponent(props) {
             quantity: 12,
             icon: '/asset/images/icons/product-documents.svg',
             active: false,
+            typeCategory: TypeCategory.YCLIENQUAN,
             component: null,
             classbg: 'bg-red',
-            href: ""
+            href: `/?typeCategory=${TypeCategory.YCLIENQUAN}`
         }
     ])
 
-    const fakeData = [
-        {
-            id: 'YC0000001',
-            name: 'Tiếp quỹ A',
-            priority: 0,
-            status: 'InProgress',
-            ticketKey: 'YC1',
-            date: '20/01/2022 13:00',
-        },
-        {
-            id: 'YC0000002',
-            priority: 1,
-            status: 'Done',
-            name: 'Tiếp quỹ B',
-            ticketKey: 'YC1',
-            date: '20/01/2022 13:00',
-        }
-    ]
     const renderActionGrid = (params) => {
         return (
             <div className="box-action-container">
@@ -101,24 +140,25 @@ function DashBoardComponent(props) {
     }
 
     const priorityRender = (value) => {
-        switch (value) {
-            case 0: return <span class="dot green"> </span>;
-            case 1: return <span class="dot red"> </span>;
-            default: return null;
+        const findPriority = masterData?.find(x => x?.id === value);
+        if (findPriority) {
+            return <span className="dot" style={{ background: findPriority?.master_attributes ?? "#8ec320" }}>
+            </span>
         }
+        return null;
     }
 
     const statusRender = (value) => {
-        switch (value) {
-            case "InProgress": return <div class="status blue-3"> <span>Chờ hoàn tất</span></div>;
-            case "Done": return <div class="status orange-2"> <span>Bổ sung hồ sơ</span></div>;
-            default: return null;
+        const findStatus = masterData?.find(x => x?.id === value);
+        if (findStatus) {
+            return <div class="status" style={{ background: findStatus?.master_attributes ?? "#80c2ff" }}><span>{findStatus?.master_name}</span></div>
         }
+        return null;
     }
 
     const columns = [
         {
-            field: 'id',
+            field: 'req_code',
             headerName: "Mã yêu cầu",
             headerClassName: 'headerColumn',
             flex: 1,
@@ -134,7 +174,7 @@ function DashBoardComponent(props) {
                     >
                         <a>
                             <td>
-                                <p>{cell?.row?.id}</p>
+                                <p>{cell?.row?.req_code}</p>
                             </td>
                         </a>
                     </DynamicLink>
@@ -142,39 +182,39 @@ function DashBoardComponent(props) {
             }
         },
         {
-            field: 'name',
+            field: 'req_name',
             headerName: "Tên yêu cầu",
             headerClassName: 'headerColumn',
             flex: 1,
             editable: false,
             renderCell: (cell) => {
                 return <td>
-                    <p>{cell?.row?.name}</p>
+                    <p>{cell?.row?.req_name}</p>
                 </td>
 
             }
         },
         {
-            field: 'statusCode',
+            field: 'status',
             headerName: "Trạng thái",
             headerClassName: 'headerColumn',
             flex: 1,
             editable: false,
             renderCell: (cell) => {
                 return <td>
-                    {statusRender(cell?.row?.status)}
+                    {statusRender(cell?.row?.statusID)}
                 </td>
             }
         },
         {
-            field: 'date',
+            field: 'req_date',
             headerName: "Ngày yêu cầu",
             headerClassName: 'headerColumn',
             flex: 1,
             editable: false,
             renderCell: (cell) => {
                 return <td>
-                    <div class="date-time"> <span>03/04/2022</span></div>
+                    <div class="date-time"> <span>{cell?.row?.req_date}</span></div>
                 </td>
             }
         },
@@ -213,6 +253,112 @@ function DashBoardComponent(props) {
         },
     ];
 
+    const columnsLXQ = [
+        {
+            field: 'req_code',
+            headerName: "Mã yêu cầu",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: false,
+            renderCell: (cell) => {
+                return <>
+                    <td>{priorityRender(cell?.row?.priority)}</td>
+                    &nbsp;
+                    &nbsp;
+                    <DynamicLink
+                        href={`/document-board?id=${cell?.row?.id}&category=${selectedData.category}`}
+                        as={`/document-board?id=${cell?.row?.id}&category=${selectedData.category}`}
+                    >
+                        <a>
+                            <td>
+                                <p>{cell?.row?.req_code}</p>
+                            </td>
+                        </a>
+                    </DynamicLink>
+                </>
+            }
+        },
+        {
+            field: 'status',
+            headerName: "Trạng thái",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: false,
+            renderCell: (cell) => {
+                return <td>
+                    {statusRender(cell?.row?.status)}
+                </td>
+            }
+        },
+        {
+            field: 'req_date',
+            headerName: "Ngày yêu cầu",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: false,
+            renderCell: (cell) => {
+                return <td>
+                    <div class="date-time"> <span>{cell?.row?.req_date}</span></div>
+                </td>
+            }
+        },
+        {
+            field: 'perfome_date',
+            headerName: "Ngày thực hiện",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: false,
+            renderCell: (cell) => {
+                return <td>
+                    <div class="date-time"> <span>{cell?.row?.perfome_date}</span></div>
+                </td>
+            }
+        },
+        {
+            field: 'createdBy',
+            headerName: "Người tạo",
+            headerAlign: 'left',
+            headerClassName: 'headerColumn',
+            minWidth: 50,
+            flex: 1,
+            editable: false,
+            renderCell: (cell) => {
+                return <>
+                    <td>
+                        <div class="user-avatar">
+                            <img src="/asset/images/icons/avatar.png" alt="" />
+                        </div>
+                    </td>
+                    <td>
+                        <p>Nguyễn Văn A</p>
+                    </td>
+                </>
+            }
+        },
+        {
+            field: 'action',
+            headerName: 'Thao tác',
+            sortable: false,
+            headerClassName: 'headerColumn',
+            headerAlign: 'center',
+            flex: 1,
+            disableClickEventBubbling: true,
+            renderCell: (cell) => {
+                return renderActionGrid(cell?.row)
+            }
+        },
+    ];
+
+    const renderGridByCategory=()=>{
+        if(selectedData.category===TaskCategory.TIEPNOPQUY){
+            return columns
+        }
+        if(selectedData.category===TaskCategory.LENHXUATQUY){
+            return columnsLXQ
+        }
+        return columns;
+    }
+
     return (
         <>
             <section class="header-menu">
@@ -222,7 +368,10 @@ function DashBoardComponent(props) {
                             {
                                 programData?.map((item, index) => {
                                     return (
-                                        <li class={`${item?.active ? 'active' : ''}`}>
+                                        <li onClick={() => {
+                                            // selectedData.typeCategory = item.typeCategory;
+                                            // setSelectedData({ ...selectedData })
+                                        }} class={`${item?.typeCategory === selectedData.typeCategory ? 'active' : ''}`}>
                                             <DynamicLink href={item?.href} as={item?.href}>
                                                 <a class={`wrapper-content ${item?.classbg} d-flex align-items-center`}>
                                                     <div class="icon">
@@ -313,9 +462,9 @@ function DashBoardComponent(props) {
                         </div>
                         <div class="wrapper-right_body">
                             <DataGridControl
-                                rows={fakeData}
-                                columns={columns}
-                                count={fakeData.length}
+                                rows={componentData.datagrid}
+                                columns={renderGridByCategory()}
+                                count={componentData.datagrid?.length}
                                 disableSelectionOnClick
                             />
                         </div>

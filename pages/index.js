@@ -5,14 +5,14 @@ import CommonLayout from "../shared/packages/layout/root-layout.package";
 import Utility from "../shared/packages/utils/common";
 import DashBoardComponent from "../component/dashboard/dashboard"
 
-function HomePage() {
+function HomePage(props) {
   const { t } = useTranslation('common');
   return (
     <React.Fragment>
       <Head>
         <title>Điều phối tiền mặt</title>
       </Head>
-      <DashBoardComponent />
+      <DashBoardComponent {...props} />
     </React.Fragment>
   );
 }

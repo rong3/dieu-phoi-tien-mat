@@ -1,105 +1,430 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import GroupBoxComponent from "../../../../../shared/groupBox/groupBox"
 import SelectBox from "../../../../../../shared/packages/control/selectBox/selectBox"
 import { InputControl } from "../../../../../../shared/packages/control/input/inputControl"
 import DateTimeInput from "../../../../../../shared/packages/control/input/datetime"
-import {
-    Box,
-    Divider,
-    Drawer
-} from "@material-ui/core";
-import HistoryComponent from "../../../../../shared/history/history"
+import { useDispatch, useSelector } from "react-redux";
+import { useToasts } from "react-toast-notifications";
+import PrioritySelect from "../../../../../common/PrioritySelect/PrioritySelect"
+import { GetLXQById, UpdateLXQById, UpdateStatusLXQ, PostLXQ } from "../../../../../../services/dptm/lenhxuatquy"
+import { GetYCTiepNopQuy } from "../../../../../../services/dptm/yeucautiepnopquy"
 
 function FundReleaseContainer(props) {
-    const { id } = props;
+    const { id, selected } = props;
     const router = useRouter()
-    const keyMenuFloat = 'right';
-    const [stateSlide, setStateSlide] = React.useState({
-        top: false,
-        left: false,
-        bottom: false,
-        right: false,
-    });
+    const { addToast } = useToasts();
 
-    const toggleDrawer = (open) => (event) => {
-        if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-            return;
-        }
-        setStateSlide({ ...stateSlide, [keyMenuFloat]: open });
-    };
-
-    const closeSideBar = (open) => {
-        setStateSlide({ ...stateSlide, [keyMenuFloat]: open });
-    }
-    const list = (anchor) => (
-        <Box
-            sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 320 }}
-            role="presentation"
-        >
-            <HistoryComponent data={[]} />
-        </Box>
-    );
-    const [modelData, setModelData] = useState({
-        typeCurrency: [
-            {
-                id: 1,
-                name: 'USD',
-                data: null,
-                checked: true
-            },
-            {
-                id: 2,
-                name: 'AUD',
-                data: null,
-                checked: false,
-            },
-            {
-                id: 3,
-                name: 'VND',
-                data: null,
-                checked: false
-            },
-        ],
-        relatedUser: [
-            {
-                id: 1,
-                name: 'Nguyen Van A',
-                data: null,
-                checked: true
-            },
-            {
-                id: 2,
-                name: 'Nguyen Van B',
-                data: null,
-                checked: true
-            },
-            {
-                id: 3,
-                name: 'Nguyen Van C',
-                data: null,
-                checked: true
-            },
-        ]
+    const { masterData, relatedUser, dsnv3kv } = useSelector((state) => state.masterData);
+    const [componentData, setComponentData] = useState({
+        dvkd: [],
+        loaiyeucau: [],
+        loaitien: [],
+        khuvuc: [],
+        uutien: [],
+        trangthai: [],
+        nguoilienquan: [],
+        nguoilienquan2: [],
+        kiemngan: [],
+        taixe: [],
+        baove: [],
+        listyctnq: []
     })
+    const [modelData, setModelData] = useState({
+        masterAttributes: [],
+        nguoiLienQuan: [],
+        chuyenthucthi_ID: null
+    })
+    const nguoithuchiRef = useRef(null)
+
+    useEffect(() => {
+        if (id) {
+            GetLXQById(id).then((res) => {
+                const data = res?.data ?? null;
+                if (data) {
+                    setModelData({ ...modelData, ...data })
+                }
+            })
+        }
+        else {
+            GetYCTiepNopQuy().then((res) => {
+                const statusFind = findStatus('received');
+                const convert = res?.data?.filter(x => x.statusID === statusFind?.id)?.map(x => ({
+                    id: x?.id,
+                    name: `${x?.req_code} - ${x?.req_name}`
+                })) ?? [];
+                componentData.listyctnq = convert;
+                setComponentData({ ...componentData })
+            }).catch((err) => {
+                console.log({ err });
+            })
+        }
+    }, [id])
+
+    useEffect(() => {
+        try {
+            if (relatedUser && masterData?.length > 0 && dsnv3kv) {
+                //get list don vi kinh doanh
+                const dvkdList = masterData?.filter(x => x?.category === 'dvkd')?.sort((a, b) => a?.master_name - b?.master_name)?.map((item) => ({
+                    id: item?.id,
+                    label: `${item?.master_name} - ${JSON.parse(item?.extra_data)?.name ?? ''}`
+                }));
+
+                //get list loai ye cau
+                const lycList = masterData?.filter(x => x?.category === 'yeucaulxq')
+
+                //get list loai tien
+                const currencyList = masterData?.filter(x => x?.category === 'loaitien')?.map((item) => {
+                    return {
+                        id: item?.id,
+                        name: item?.master_name,
+                        data: null,
+                        checked: false
+                    }
+                })
+
+                //get lsit khu vuc
+                const khuvucList = masterData?.filter(x => x?.category === 'khuvuc')?.map((item) => {
+                    return {
+                        id: item?.id,
+                        name: item?.master_name,
+                    }
+                })
+
+                //get lsit khu vuc
+                const priorityList = masterData?.filter(x => x?.category === 'uutien')?.map((item) => {
+                    return {
+                        id: item?.id,
+                        name: item?.master_name,
+                    }
+                })
+
+                //get list trang thai
+                const statusList = masterData?.filter(x => x?.category === 'trangthai')?.map((item) => {
+                    return {
+                        id: item?.id,
+                        name: item?.master_name,
+                        code: item?.extra_data
+                    }
+                })
+
+                //get list nguoi uu tien
+                const relatedUserList = [...relatedUser?.slice(0, 20)?.map(x => ({
+                    id: x?.maNhanVien,
+                    name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
+                    checked: false
+                }))]
+
+                //get taixe kiemngan bao ve
+                const baoveList = dsnv3kv?.filter(x => x?.chucdanh === 'Bảo vệ')?.map((item) => {
+                    return {
+                        id: item?.id,
+                        name: `${item?.name} - ${item?.chucdanh} - ${item?.socmnd}`,
+                    }
+                })
+
+                const kiemnganList = dsnv3kv?.filter(x => x?.chucdanh === 'Kiểm ngân')?.map((item) => {
+                    return {
+                        id: item?.id,
+                        name: `${item?.name} - ${item?.chucdanh} - ${item?.socmnd}`,
+                    }
+                })
+
+                const taixeList = dsnv3kv?.filter(x => x?.chucdanh === 'Tài xế')?.map((item) => {
+                    return {
+                        id: item?.id,
+                        name: `${item?.name} - ${item?.chucdanh} - ${item?.socmnd}`,
+                    }
+                })
+
+                componentData.dvkd = dvkdList;
+                componentData.loaiyeucau = lycList;
+                componentData.loaitien = currencyList;
+                componentData.khuvuc = khuvucList;
+                componentData.uutien = priorityList;
+                componentData.trangthai = statusList;
+                componentData.nguoilienquan = relatedUserList;
+
+                const findMerger = relatedUser?.find(x => x?.maNhanVien === modelData?.nguoi_lien_quan_id);
+                if (findMerger) {
+                    componentData.nguoilienquan2 = [
+                        {
+                            id: findMerger?.maNhanVien,
+                            name: `${findMerger?.maNhanVien} ${findMerger?.hoTenDemNhanVien} ${findMerger?.tenNhanVien} - ${findMerger?.tenChucDanhMoiNhat}`,
+                            checked: true
+                        }
+                        , ...relatedUserList?.filter(x => x.id !== modelData?.nguoi_lien_quan_id)];
+                }
+                else {
+                    componentData.nguoilienquan2 = relatedUserList;
+                }
+                componentData.baove = baoveList;
+                componentData.kiemngan = kiemnganList;
+                componentData.taixe = taixeList;
+                setComponentData({ ...componentData });
+                //default value
+            }
+        }
+        catch (err) { console.log({ err }); }
+    }, [masterData, relatedUser, dsnv3kv, modelData?.nguoi_lien_quan_id])
+
+    const findStatus = (statusName) => {
+        const find = componentData.trangthai?.find(x => x.code === statusName) ?? null
+        if (find) {
+            return find
+        }
+        return null;
+    }
+
+    const findStatusByID = (id) => {
+        const find = componentData.trangthai?.find(x => x.id === id) ?? null
+        if (find) {
+            return find
+        }
+        return null;
+    }
+
+    const isDisabledControl = () => {
+        const status = findStatusByID(modelData?.status)?.code ?? null
+        if (['approved', 'waitapproved', 'cancel', 'received', 'inprogress'].includes(status)) {
+            return true
+        }
+        return false;
+    }
 
     //func for groupbox
     const setTypeCurrencyData = (data) => {
-        modelData.typeCurrency = data;
+        modelData.masterAttributes = data;
         setModelData({ ...modelData });
     }
     const setTypeRelatedUserData = (data) => {
-        modelData.relatedUser = data;
+        modelData.nguoiLienQuan = data;
         setModelData({ ...modelData });
+    }
+
+    const onSearchRelatedUser = (data) => {
+        const timeOutId = setTimeout(() => {
+            //get list nguoi uu tien
+            if (data?.trim()?.length === 0) {
+                const relatedUserList = [...relatedUser?.filter(x => !modelData?.nguoiLienQuan?.map(x => x?.id)?.includes(x?.maNhanVien))?.slice(0, 20)?.map(x => ({
+                    id: x?.maNhanVien,
+                    name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
+                    checked: x?.checked ?? false
+                })), ...modelData?.nguoiLienQuan]?.sort((a, b) => a?.checked ? -1 : 1)
+                componentData.nguoilienquan = relatedUserList;
+                setComponentData({ ...componentData })
+            }
+            else {
+                const relatedUserList = [...relatedUser?.filter(x => !modelData?.nguoiLienQuan?.map(x => x?.id)?.includes(x?.maNhanVien)
+                    && (x.maNhanVien?.toLowerCase()?.indexOf(data?.toLowerCase()) !== -1 || (x?.hoTenDemNhanVien + ' ' + x?.tenNhanVien)?.toLowerCase()?.indexOf(data?.toLowerCase()) !== -1))?.map(x => ({
+                        id: x?.maNhanVien,
+                        name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
+                        checked: x?.checked ?? false
+                    })), ...modelData?.nguoiLienQuan]?.sort((a, b) => a?.checked ? -1 : 1)
+                componentData.nguoilienquan = relatedUserList;
+                setComponentData({ ...componentData });
+            }
+        }, 1000);
+
+        return () => clearTimeout(timeOutId);
+    }
+
+    const overwriteModel = (key, value) => {
+        modelData[key] = value;
+        setModelData({ ...modelData })
+    }
+
+    //logic button
+    const statusRenderCTA = () => {
+        const statusCode = findStatusByID(modelData?.status)?.code ?? null
+        switch (statusCode) {
+            case 'draft': return ['update', 'waitapproved']
+            case 'inprogress': return ['update', 'waitapproved']
+            case 'addition': return ['update', 'waitapproved']
+            case 'waitapproved': return ['addition', 'approved']
+            case 'approved': return ['complete']
+            case 'complete': return []
+            default: return ['draft', 'add']
+        }
+    }
+
+    const typeButtonRender = (type) => {
+        if (type === 'draft') {
+            return <button class="btn btn-draw" style={{ marginLeft: '16px' }} type="button" tabindex="0" onClick={() => {
+                const draftId = findStatus('draft')?.id;
+                if (draftId) {
+                    overwriteModel('status', draftId)
+                    insertLXQ(modelData)
+                }
+            }}>
+                <img src="/asset/images/icons/draw.svg" alt="" />
+                <span>Lưu nháp</span>
+            </button>
+        }
+        if (type === 'add') {
+            return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0"
+                onClick={() => {
+                    const statusId = findStatus("waitapproved")?.id;
+                    if (statusId) {
+                        overwriteModel('status', statusId)
+                        insertLXQ(modelData)
+                    }
+                }}
+            >
+                <img src="/asset/images/icons/send.svg" alt="" />
+                <span>
+                    Tạo yêu cầu
+                </span>
+            </button>
+        }
+        if (type === 'update') {
+            return <button class="btn btn-draw" style={{ marginLeft: '16px' }} type="button" tabindex="0" onClick={() => {
+                updateLXQ(modelData)
+            }}>
+                <img src="/asset/images/icons/draw.svg" alt="" />
+                <span>Cập nhật</span>
+            </button>
+        }
+        if (type === 'waitapproved') {
+            return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0" onClick={() => {
+                const statusId = findStatus("waitapproved")?.id;
+                if (statusId) {
+                    overwriteModel('status', statusId)
+                    updateStatusLXQ(statusId)
+                }
+            }}>
+                <img src="/asset/images/icons/draw.svg" alt="" />
+                <span>Chuyển duyệt</span>
+            </button>
+        }
+
+        if (type === 'addition') {
+            return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0" onClick={() => {
+                const statusId = findStatus("addition")?.id;
+                if (statusId) {
+                    overwriteModel('status', statusId)
+                    updateStatusLXQ(statusId)
+                }
+            }}>
+                <img src="/asset/images/icons/draw.svg" alt="" />
+                <span>Yêu cầu bổ sung</span>
+            </button>
+        }
+
+        if (type === 'approved') {
+            return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0" onClick={() => {
+                const statusId = findStatus("approved")?.id;
+                if (statusId) {
+                    overwriteModel('status', statusId)
+                    updateStatusLXQ(statusId)
+                }
+            }}>
+                <img src="/asset/images/icons/draw.svg" alt="" />
+                <span>Phê duyệt</span>
+            </button>
+        }
+
+        if (type === 'complete') {
+            return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0" onClick={() => {
+                const statusId = findStatus("complete")?.id;
+                if (statusId) {
+                    overwriteModel('status', statusId)
+                    updateStatusLXQ(statusId)
+                }
+            }}>
+                <img src="/asset/images/icons/draw.svg" alt="" />
+                <span>Hoàn tất</span>
+            </button>
+        }
+    }
+
+    const insertLXQ = (model) => {
+        const convertModel = {
+            lxq: { ...model },
+            MasterAttributes: model?.masterAttributes?.map(y => {
+                return {
+                    "master_id": y?.id,
+                    "attributes": JSON.stringify({
+                        amount: y?.data ? Number.parseInt(y?.data) : null,
+                        checked: y?.checked ?? false
+                    })
+                }
+            }),
+            nguoiLienQuan: model?.nguoiLienQuan?.filter(x => x?.checked)?.map(y => {
+                return {
+                    "nguoiLienQuan_ID": y?.id,
+                }
+            }),
+        }
+
+        PostLXQ(convertModel).then((res) => {
+            addToast(<div className="text-center">
+                Lưu thành công
+            </div>, { appearance: 'success' });
+            router.replace("/")
+        }).catch((err) => {
+            addToast(<div className="text-center">
+                Lưu thất bại
+            </div>, { appearance: 'error' });
+        })
+    }
+
+    const updateStatusLXQ = (status) => {
+        const data = {
+            id: id,
+            status: status,
+        }
+        UpdateStatusLXQ(data).then((res) => {
+            addToast(<div className="text-center">
+                Cập nhật thành công
+            </div>, { appearance: 'success' });
+        }).catch((err) => {
+            addToast(<div className="text-center">
+                Cập nhật thất bại
+            </div>, { appearance: 'error' });
+        })
+    }
+
+    const updateLXQ = (model) => {
+        const convertModel = {
+            LXQ: { ...model },
+            MasterAttributes: model?.masterAttributes?.map(y => {
+                return {
+                    "master_id": y?.id,
+                    "attributes": JSON.stringify({
+                        amount: y?.data ? Number.parseInt(y?.data) : null,
+                        checked: y?.checked ?? false
+                    })
+                }
+            }),
+            nguoiLienQuan: model?.nguoiLienQuan?.filter(x => x?.checked)?.map(y => {
+                return {
+                    "nguoiLienQuan_ID": y?.id,
+                }
+            }),
+        }
+
+        UpdateLXQById(convertModel).then((res) => {
+            addToast(<div className="text-center">
+                Cập nhật thành công
+            </div>, { appearance: 'success' });
+        }).catch((err) => {
+            addToast(<div className="text-center">
+                Cập nhật thất bại
+            </div>, { appearance: 'error' });
+        })
     }
 
     return (
         <section className="section priority-user-content">
-            <div className='row'>
-                <span className='status-block'>
-                    {`Trạng thái: ${id ? 'Tiếp nhận' : 'Nháp'}`}
-                </span>
-            </div>
+            {
+                id &&
+                <div className='row'>
+                    <span className='status-block'>
+                        {`Trạng thái: ${findStatusByID(modelData?.status)?.name ?? ""}`}
+                    </span>
+                </div>
+            }
             <div className='form-row row'>
                 <div className='form-group col-md-12'>
                     {
@@ -110,138 +435,226 @@ function FundReleaseContainer(props) {
                                 <SelectBox id="selectbox"
                                     optionLabel="name"
                                     optionValue="id"
+                                    isDisabled={isDisabledControl()}
                                     onChange={(data) => {
-
+                                        overwriteModel('yc_tiepnopquy_id', data)
                                     }}
-                                    value={null}
+                                    value={modelData?.yc_tiepnopquy_id}
                                     isPortal
-                                    options={[]}
+                                    options={componentData.listyctnq}
                                 />
                             </div>
                         </div>
                     }
-
                     <div className="form-row row">
-                        <div className="form-group col-md-4">
+                        <div class="form-group col-md-6">
+                            <span>Ưu tiên</span>
+                            <PrioritySelect isDisabled={isDisabledControl()} value={modelData?.priorityID} data={componentData.uutien} onChange={(data) => {
+                                overwriteModel('priorityID', data)
+                            }} />
+                        </div>
+                        <div className="form-group col-lg-6">
+                            <span>Loại Yêu cầu</span>
+                            <SelectBox id="selectbox"
+                                isDisabled={isDisabledControl()}
+                                optionLabel="master_name"
+                                optionValue="id"
+                                onChange={(data) => {
+                                    overwriteModel('req_type', data)
+                                }}
+                                value={modelData?.req_type}
+                                isPortal
+                                options={componentData.loaiyeucau}
+                            />
+                        </div>
+                    </div>
+                    <div className="form-row row">
+                        <div className="form-group col-md-6">
                             <span>Ngày yêu cầu</span>
-                            <DateTimeInput selected={new Date()}
+                            <DateTimeInput selected={modelData?.req_date ? new Date(modelData?.req_date) : null}
+                                disabled={isDisabledControl()}
                                 isDefaultEmpty
                                 isPortal
-                                id="startDate" isOnlyDate={false} onChange={(data) => {
-
+                                id="startDate" isOnlyDate={true} onChange={(data) => {
+                                    overwriteModel('req_date', data)
                                 }} />
                         </div>
-                        <div className="form-group col-md-4">
-                            <span>Mã ĐVKD yêu cầu</span>
-                            <InputControl type="text" id="name" onChange={(e) => {
-                                const value = e.target.value ?? '';
-                            }} defaultValue={null} />
+                        <div className="form-group col-md-6">
+                            <span>ĐVKD yêu cầu</span>
+                            <SelectBox id="selectboxdvkd"
+                                isDisabled={isDisabledControl()}
+                                optionLabel="label"
+                                optionValue="id"
+                                onChange={(data) => {
+                                    const value = data ?? '';
+                                    overwriteModel('dvkd_req', value)
+                                }}
+                                value={modelData?.dvkd_req}
+                                isPortal
+                                options={componentData.dvkd}
+                            />
                         </div>
-                        <div className="col-md-4">
-                            <span>Tên ĐVKD yêu cầu</span>
-                            <InputControl type="text" id="name" onChange={(e) => {
-                                const value = e.target.value ?? '';
-                            }} defaultValue={null} />
-                        </div>
-                        <div className="col-md-4">
+
+                        <div className="form-group col-md-6">
                             <span>Ngày thực hiện</span>
-                            <DateTimeInput selected={new Date()}
+                            <DateTimeInput selected={modelData?.perfome_date ? new Date(modelData?.perfome_date) : null}
+                                disabled={isDisabledControl()}
                                 isDefaultEmpty
                                 isPortal
-                                id="startDate" isOnlyDate={false} onChange={(data) => {
-
+                                id="startDatePerform" isOnlyDate={true} onChange={(data) => {
+                                    overwriteModel('perfome_date', data)
                                 }} />
                         </div>
-                        <div className="col-md-4">
-                            <span>Mã ĐVKD thực hiện</span>
-                            <InputControl type="text" id="name" onChange={(e) => {
-                                const value = e.target.value ?? '';
-                            }} defaultValue={null} />
-                        </div>
-                        <div className="col-md-4">
-                            <span>Tên ĐVKD thực hiện</span>
-                            <InputControl type="text" id="name" onChange={(e) => {
-                                const value = e.target.value ?? '';
-                            }} defaultValue={null} />
+                        <div className="form-group col-md-6">
+                            <span>ĐVKD thực hiện</span>
+                            <SelectBox id="selectboxdvkd"
+                                isDisabled={isDisabledControl()}
+                                optionLabel="label"
+                                optionValue="id"
+                                onChange={(data) => {
+                                    const value = data ?? '';
+                                    overwriteModel('dvkd_perfome', value)
+                                }}
+                                value={modelData?.dvkd_perfome}
+                                isPortal
+                                options={componentData.dvkd}
+                            />
                         </div>
                     </div>
                     <div className='form-row row'>
-                        <div className="col-md-4">
+                        <div className="form-group col-md-4">
                             <span>Loại tiền</span>
                             <GroupBoxComponent
+                                disabled={isDisabledControl()}
                                 isShowTextBox={true}
                                 setData={setTypeCurrencyData}
-                                data={modelData.typeCurrency} />
+                                data={componentData.loaitien} />
                         </div>
-                        <div className="col-md-4">
+                        <div className="form-group col-md-4">
                             <span>Chuyển thực thi</span>
                             <GroupBoxComponent
+                                onSearch={onSearchRelatedUser}
+                                disabled={isDisabledControl()}
                                 isShowTextBox={false}
                                 setData={setTypeRelatedUserData}
-                                data={modelData.relatedUser} />
+                                data={componentData?.nguoilienquan} />
                         </div>
-                        <div className="col-md-4">
+                        <div className="form-group col-md-4">
                             <span>Mô tả</span>
-                            <InputControl rows={9} type="textarea" id="name" onChange={(e) => {
+                            <InputControl rows={9} disabled={isDisabledControl()} type="textarea" id="name" onChange={(e) => {
                                 const value = e.target.value ?? '';
-                            }} defaultValue={null} />
+                                overwriteModel('desc', value)
+                            }} defaultValue={modelData?.desc} />
                         </div>
                     </div>
                     <div className='form-row row'>
-                        <div className="col-md-3">
+                        <div className="form-group col-md-3">
                             <span>Kiểm ngân</span>
                             <SelectBox id="selectbox"
                                 optionLabel="name"
                                 optionValue="id"
+                                isDisabled={isDisabledControl()}
                                 onChange={(data) => {
-
+                                    const value = data ?? null;
+                                    overwriteModel('kiemngan_id', value)
                                 }}
-                                value={null}
+                                value={modelData?.kiemngan_id}
                                 isPortal
-                                options={[]}
+                                options={componentData.kiemngan}
                             />
                         </div>
-                        <div className="col-md-3">
+                        <div className="form-group col-md-3">
                             <span>Tài xế</span>
                             <SelectBox id="selectbox"
                                 optionLabel="name"
                                 optionValue="id"
+                                isDisabled={isDisabledControl()}
                                 onChange={(data) => {
-
+                                    const value = data ?? null;
+                                    overwriteModel('taixe_id', value)
                                 }}
-                                value={null}
+                                value={modelData?.taixe_id}
                                 isPortal
-                                options={[]}
+                                options={componentData.taixe}
                             />
                         </div>
-                        <div className="col-md-3">
+                        <div className="form-group col-md-3">
                             <span>Bảo vệ</span>
                             <SelectBox id="selectbox"
                                 optionLabel="name"
                                 optionValue="id"
+                                isDisabled={isDisabledControl()}
                                 onChange={(data) => {
-
+                                    const value = data ?? null;
+                                    overwriteModel('baove_id', value)
                                 }}
-                                value={null}
+                                value={modelData?.baove_id}
                                 isPortal
-                                options={[]}
+                                options={componentData.baove}
                             />
                         </div>
-                        <div className="col-md-3">
+                        <div className="form-group col-md-3">
                             <span>Người liên quan</span>
                             <SelectBox id="selectbox"
                                 optionLabel="name"
                                 optionValue="id"
+                                isDisabled={isDisabledControl()}
                                 onChange={(data) => {
-
+                                    overwriteModel('nguoi_lien_quan_id', data)
+                                    nguoithuchiRef.current = data
                                 }}
-                                value={null}
+                                onInputChange={(data) => {
+                                    const timeOutId = setTimeout(() => {
+                                        //get list nguoi uu tien
+                                        if (data?.trim()?.length === 0) {
+                                            const selectedCache = relatedUser?.find(x => x.maNhanVien === nguoithuchiRef?.current);
+                                            if (selectedCache) {
+                                                const relatedUserList = [...relatedUser?.slice(0, 20)?.map(x => ({
+                                                    id: x?.maNhanVien,
+                                                    name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
+                                                })), ...[{
+                                                    id: selectedCache?.maNhanVien,
+                                                    name: `${selectedCache?.maNhanVien} ${selectedCache?.hoTenDemNhanVien} ${selectedCache?.tenNhanVien} - ${selectedCache?.tenChucDanhMoiNhat}`,
+                                                }]]
+                                                componentData.nguoilienquan2 = relatedUserList;
+                                                setComponentData({ ...componentData })
+                                            }
+                                            else {
+                                                const relatedUserList = [...relatedUser?.slice(0, 20)?.map(x => ({
+                                                    id: x?.maNhanVien,
+                                                    name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
+                                                }))]
+                                                componentData.nguoilienquan2 = relatedUserList;
+                                                setComponentData({ ...componentData })
+                                            }
+                                        }
+                                        else {
+                                            const relatedUserList = [...relatedUser?.filter(x =>
+                                                (x.maNhanVien?.toLowerCase()?.indexOf(data?.toLowerCase()) !== -1 || (x?.hoTenDemNhanVien + ' ' + x?.tenNhanVien)?.toLowerCase()?.indexOf(data?.toLowerCase()) !== -1))?.map(x => ({
+                                                    id: x?.maNhanVien,
+                                                    name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
+                                                }))]
+                                            componentData.nguoilienquan2 = relatedUserList;
+                                            setComponentData({ ...componentData });
+                                        }
+                                    }, 1000);
+                                }}
+                                value={modelData?.nguoi_lien_quan_id}
                                 isPortal
-                                options={[]}
+                                options={componentData?.nguoilienquan2}
                             />
                         </div>
                     </div>
                 </div>
+            </div>
+            <div class="button-bottom">
+                {
+                    statusRenderCTA()?.map(x => {
+                        return (
+                            typeButtonRender(x)
+                        )
+                    })
+                }
             </div>
         </section>
     );

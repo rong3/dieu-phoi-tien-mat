@@ -4,46 +4,24 @@ import FundReleaseContainer from "../../../fundRelease/component/fundRelaseConta
 import TagifyComponent from "../../../../../../shared/packages/control/Tagify/Tagify"
 
 function ListFundRelaseBelongs(props) {
+    const { id, datalxq } = props;
     const router = useRouter()
-    const [selected, setSelected] = useState(null);
-    const masterData = [
-        {
-            id: 'LXQ0000001',
-            name: 'LXQ0000001',
-            ticketKey: 'YC1',
-            date: '20/01/2022 13:00',
-        },
-        {
-            id: 'LXQ0000002',
-            name: 'LXQ0000002',
-            ticketKey: 'YC1',
-            date: '20/01/2022 13:00',
-        },
-        {
-            id: 'LXQ0000003',
-            name: 'LXQ0000003',
-            ticketKey: 'YC1',
-            date: '20/01/2022 13:00',
-        },
-        {
-            id: 'LXQ0000004',
-            name: 'LXQ0000004',
-            ticketKey: 'YC1',
-            date: '20/01/2022 13:00',
-        },
-        {
-            id: 'LXQ0000005',
-            name: 'LXQ0000005',
-            ticketKey: 'YC1',
-            date: '20/01/2022 13:00',
-        },
-        {
-            id: 'LXQ0000006',
-            name: 'LXQ0000006',
-            ticketKey: 'YC1',
-            date: '20/01/2022 13:00',
+    const [dataLXQState, setDataLXQState] = useState({
+        dataTag: [],
+        selected: null
+    })
+
+    useEffect(() => {
+        if (datalxq?.length > 0) {
+            const convert = datalxq?.map((x) => ({
+                id: x?.id,
+                name: x?.req_code
+            }))
+            dataLXQState.dataTag = convert;
+            setDataLXQState({ ...dataLXQState })
         }
-    ]
+    }, [datalxq])
+
     return (
         <div className='fundrelasecontainer row'>
             <div className='col-md-12 border-container'>
@@ -59,19 +37,22 @@ function ListFundRelaseBelongs(props) {
                                 liClassName="tab-item"
                                 aClassName="tab-item_link"
                                 onSelected={(item) => {
+                                    dataLXQState.selected=null;
+                                    setDataLXQState({ ...dataLXQState })
                                     setTimeout(() => {
-                                        setSelected(item)
+                                        dataLXQState.selected = dataLXQState.dataTag?.find(x => x?.name === item[0]);
+                                        setDataLXQState({ ...dataLXQState })
                                     }, 0);
                                 }}
                                 isFilter={false}
-                                listTag={masterData ?? []}
+                                listTag={dataLXQState.dataTag ?? []}
                             />
                         }
                     </ul>
                 </div>
                 {
-                    selected?.length > 0 &&
-                    <FundReleaseContainer id={selected[0]} />
+                    dataLXQState.selected &&
+                    <FundReleaseContainer id={dataLXQState.selected?.id} selected={dataLXQState.selected} />
                 }
 
             </div>

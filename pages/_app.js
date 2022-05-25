@@ -17,7 +17,9 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import { ProvideAuth } from "../shared/packages/provider/authBase"
 import { AccessControlProvider } from "../shared/packages/provider/accessGateway"
 // Redux
+import { useDispatch, useSelector } from "react-redux";
 import { wrapper } from '../redux/store'
+import { loadMasterData, loadRelatedUser, loadDSNV3KV } from "../redux/actions/masterDataAction"
 //Layout
 import NonLayOut from "../shared/packages/layout/non-layout"
 import Loading from "../component/loading/loadingComponent"
@@ -33,6 +35,7 @@ function Default({ Component, pageProps }) {
   const Layout = Component?.Layout ?? NonLayOut;
   const [darkState, setDarkState] = useState(false);
   const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const loadLazyCSS = (link) => {
     var cssMain = document.createElement('link');
@@ -46,8 +49,16 @@ function Default({ Component, pageProps }) {
     loadLazyCSS('/asset/css/main.min.css');
     loadLazyCSS('/asset/css/plugins.min.css');
     loadLazyCSS('/asset/fonts/all.css');
-  }, [])
 
+    dispatch(loadMasterData({
+    }));
+
+    dispatch(loadRelatedUser({
+    }));
+
+    dispatch(loadDSNV3KV({
+    }));
+  }, [])
 
   useEffect(() => {
     const handleStart = (url) => {

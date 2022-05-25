@@ -5,165 +5,208 @@ import SelectBox from "../../../../../../shared/packages/control/selectBox/selec
 import { InputControl } from "../../../../../../shared/packages/control/input/inputControl"
 import DateTimeInput from "../../../../../../shared/packages/control/input/datetime"
 import ListVehicleBelongs from "../listVehicleBelongs/listVehicleBelongs"
-import {
-    Box,
-    Divider,
-    Drawer
-} from "@material-ui/core";
-import HistoryComponent from "../../../../../shared/history/history"
+import { useToasts } from "react-toast-notifications";
+import { useDispatch, useSelector } from "react-redux";
+import PrioritySelect from "../../../../../common/PrioritySelect/PrioritySelect"
 
 function VehicleRequiredComponent(props) {
-    const { id } = props;
-    const router = useRouter()
-    const keyMenuFloat = 'right';
-    const [stateSlide, setStateSlide] = React.useState({
-        top: false,
-        left: false,
-        bottom: false,
-        right: false,
-    });
+    const { id, remoteData } = props;
+    const { addToast } = useToasts();
 
-    const toggleDrawer = (open) => (event) => {
-        if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-            return;
-        }
-        setStateSlide({ ...stateSlide, [keyMenuFloat]: open });
-    };
+    const { masterData, relatedUser } = useSelector((state) => state.masterData);
 
-    const closeSideBar = (open) => {
-        setStateSlide({ ...stateSlide, [keyMenuFloat]: open });
-    }
-
-    const list = (anchor) => (
-        <Box
-            sx={{ width: anchor === 'top' || anchor === 'bottom' ? 'auto' : 320 }}
-            role="presentation"
-        >
-            <HistoryComponent data={[]} />
-        </Box>
-    );
-
-
-    const masterData = {
-        type: [
-            {
-                id: 1,
-                name: 'Theo thực tế'
-            },
-            {
-                id: 2,
-                name: 'Theo hợp đồng'
-            }
-        ],
-        question: [
-            {
-                id: 1,
-                name: 'Có'
-            },
-            {
-                id: 2,
-                name: 'Không'
-            }
-        ],
-        required: [
-            {
-                id: 1,
-                name: 'Thu hộ'
-            },
-            {
-                id: 2,
-                name: 'Chi hộ'
-            },
-            {
-                id: 3,
-                name: 'Tiếp ATM'
-            },
-        ],
-        city: [
-            {
-                id: 1,
-                name: 'Hồ Chí Minh'
-            },
-            {
-                id: 2,
-                name: 'Hà Nội'
-            },
-            {
-                id: 3,
-                name: 'Đồng Nai'
-            }
-        ]
-    }
     const [modelData, setModelData] = useState({
-        typeCurrency: [
-            {
-                id: 1,
-                name: 'USD',
-                data: null,
-                checked: true
-            },
-            {
-                id: 2,
-                name: 'AUD',
-                data: null,
-                checked: false,
-            },
-            {
-                id: 3,
-                name: 'VND',
-                data: null,
-                checked: false
-            },
-            {
-                id: 4,
-                name: 'KRW',
-                data: null,
-                checked: false
-            }
-        ],
-        relatedUser: [
-            {
-                id: 1,
-                name: 'Nguyen Van A',
-                data: null,
-                checked: true
-            },
-            {
-                id: 2,
-                name: 'Nguyen Van B',
-                data: null,
-                checked: true
-            },
-            {
-                id: 3,
-                name: 'Nguyen Van C',
-                data: null,
-                checked: true
-            },
-        ]
+        masterAttributes: [],
+        nguoiLienQuan: [],
+    })
+
+    const [componentData, setComponentData] = useState({
+        dvkd: [],
+        loaiyeucau: [],
+        yeucau: [],
+        loaitien: [],
+        khuvuc: [],
+        uutien: [],
+        trangthai: [],
+        nguoilienquan: []
     })
 
     //func for groupbox
     const setTypeCurrencyData = (data) => {
-        modelData.typeCurrency = data;
+        modelData.masterAttributes = data;
         setModelData({ ...modelData });
     }
     const setTypeRelatedUserData = (data) => {
-        modelData.relatedUser = data;
+        modelData.nguoiLienQuan = data;
         setModelData({ ...modelData });
     }
 
+
+    const findStatus = (statusName) => {
+        const find = componentData.trangthai?.find(x => x.code === statusName) ?? null
+        if (find) {
+            return find
+        }
+        return null;
+    }
+
+    const findStatusByID = (id) => {
+        const find = componentData.trangthai?.find(x => x.id === id) ?? null
+        if (find) {
+            return find
+        }
+        return null;
+    }
+
+
+    useEffect(() => {
+        try {
+            if (relatedUser && masterData?.length > 0) {
+                //get list loai ye cau
+                const lycList = masterData?.filter(x => x?.category === 'loaiyeucauhtx')
+                const ycList = masterData?.filter(x => x?.category === 'yeucauhtx')
+                //get list loai tien
+                const currencyList = masterData?.filter(x => x?.category === 'loaitien')?.map((item) => {
+                    return {
+                        id: item?.id,
+                        name: item?.master_name,
+                        data: null,
+                        checked: false
+                    }
+                })
+
+                //get lsit khu vuc
+                const khuvucList = masterData?.filter(x => x?.category === 'khuvuc')?.map((item) => {
+                    return {
+                        id: item?.id,
+                        name: item?.master_name,
+                    }
+                })
+
+                //get lsit khu vuc
+                const priorityList = masterData?.filter(x => x?.category === 'uutien')?.map((item) => {
+                    return {
+                        id: item?.id,
+                        name: item?.master_name,
+                    }
+                })
+
+                //get list trang thai
+                const statusList = masterData?.filter(x => x?.category === 'trangthai')?.map((item) => {
+                    return {
+                        id: item?.id,
+                        name: item?.master_name,
+                        code: item?.extra_data
+                    }
+                })
+
+                //get list nguoi uu tien
+                const relatedUserList = [...relatedUser]?.slice(0, 20)?.map(x => ({
+                    id: x?.maNhanVien,
+                    name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
+                    checked: false
+                }))
+
+                componentData.loaiyeucau = lycList;
+                componentData.yeucau = ycList;
+                componentData.loaitien = currencyList;
+                componentData.khuvuc = khuvucList;
+                componentData.uutien = priorityList;
+                if (priorityList?.length > 1) {
+                    modelData['priorityID'] = priorityList[2]?.id
+                }
+
+                componentData.trangthai = statusList;
+                componentData.nguoilienquan = relatedUserList;
+                setComponentData({ ...componentData });
+
+                //default value
+                if (remoteData?.model) {
+                    remoteData?.model?.masterAttributes?.map((x) => {
+                        const find = componentData.loaitien?.find(m => m.id === x?.master_id) ?? null
+                        if (find) {
+                            const convertAttributes = JSON.parse(x?.attributes) ?? null;
+                            if (convertAttributes) {
+                                find.data = convertAttributes?.amount;
+                                find.checked = convertAttributes?.checked ?? false
+                            }
+                        }
+                    })
+
+                    setModelData({
+                        ...modelData, ...remoteData?.model, nguoiLienQuan: [
+                            ...(remoteData?.model?.nguoiLienQuan ?? [])?.map((x) => {
+                                const find = relatedUser?.find(m => m?.maNhanVien === x?.nguoiLienQuan_ID) ?? null
+                                return {
+                                    id: find?.maNhanVien,
+                                    name: `${find?.maNhanVien} ${find?.hoTenDemNhanVien} ${find?.tenNhanVien} - ${find?.tenChucDanhMoiNhat}`,
+                                    checked: true
+                                }
+                            })
+                        ]
+                    })
+
+                }
+            }
+        }
+        catch (err) { console.log({ err }); }
+    }, [masterData, relatedUser, remoteData?.model])
+
+    const onSearchRelatedUser = (data) => {
+        const timeOutId = setTimeout(() => {
+            //get list nguoi uu tien
+            if (data?.trim()?.length === 0) {
+                const relatedUserList = [...relatedUser?.filter(x => !modelData?.nguoiLienQuan?.map(x => x?.id)?.includes(x?.maNhanVien))?.slice(0, 20)?.map(x => ({
+                    id: x?.maNhanVien,
+                    name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
+                    checked: x?.checked ?? false
+                })), ...modelData?.nguoiLienQuan]?.sort((a, b) => a?.checked ? -1 : 1)
+                componentData.nguoilienquan = relatedUserList;
+                setComponentData({ ...componentData })
+            }
+            else {
+                const relatedUserList = [...relatedUser?.filter(x => !modelData?.nguoiLienQuan?.map(x => x?.id)?.includes(x?.maNhanVien)
+                    && (x.maNhanVien?.toLowerCase()?.indexOf(data?.toLowerCase()) !== -1 || (x?.hoTenDemNhanVien + ' ' + x?.tenNhanVien)?.toLowerCase()?.indexOf(data?.toLowerCase()) !== -1))?.map(x => ({
+                        id: x?.maNhanVien,
+                        name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
+                        checked: x?.checked ?? false
+                    })), ...modelData?.nguoiLienQuan]?.sort((a, b) => a?.checked ? -1 : 1)
+                componentData.nguoilienquan = relatedUserList;
+                setComponentData({ ...componentData });
+            }
+        }, 1000);
+
+        return () => clearTimeout(timeOutId);
+    }
+
+    const overwriteModel = (key, value) => {
+        modelData[key] = value;
+        setModelData({ ...modelData })
+    }
+
+    const isDisabledControl = () => {
+        const status = findStatusByID(modelData?.statusID)?.code ?? null
+        if (['approved', 'waitapproved', 'cancel', 'received', 'inprogress'].includes(status)) {
+            return true
+        }
+        return false;
+    }
+
+
     return (
         <section className="section priority-user-content">
-            <div className='row'>
-                <span className='status-block'>
-                    {`Trạng thái: ${id ? 'Tiếp nhận' : 'Nháp'}`}
-                </span>
-            </div>
+            {
+                id &&
+                <div className='row'>
+                    <span className='status-block'>
+                        {`Trạng thái: ${findStatusByID(modelData?.statusID)?.name ?? ""}`}
+                    </span>
+                </div>
+            }
             {
                 id &&
                 <div className="form-row row">
-                    <div className="col-md-2">
+                    <div className="form-group col-md-2">
                         <span>Bản sửa đổi bổ sung</span>
                         <SelectBox id="selectbox"
                             optionLabel="name"
@@ -179,114 +222,130 @@ function VehicleRequiredComponent(props) {
                 </div>
             }
             <div className='form-row row'>
-                <div className='form-group col-md-12'>
-                    <div className="form-row row">
-                        <div className="col-md-4">
-                            <span>Loại Yêu cầu</span>
-                            <SelectBox id="selectbox"
-                                optionLabel="name"
-                                optionValue="id"
-                                onChange={(data) => {
-                                }}
-                                value={null}
-                                isPortal
-                                options={masterData.type}
-                            />
-                        </div>
-                        <div className="col-md-4">
-                            <span>Tên khách hàng</span>
-                            <InputControl type="text" id="name" onChange={(e) => {
-                                const value = e.target.value ?? '';
-                            }} defaultValue={null} />
-                        </div>
-                        <div className="col-md-4">
-                            <span>Tên yêu cầu</span>
-                            <InputControl type="text" id="name" onChange={(e) => {
-                                const value = e.target.value ?? '';
-                            }} defaultValue={null} />
-                        </div>
-                        <div className="col-md-4">
-                            <span>Yêu cầu</span>
-                            <SelectBox id="selectbox"
-                                optionLabel="name"
-                                optionValue="id"
-                                onChange={(data) => {
-                                }}
-                                value={null}
-                                isPortal
-                                options={masterData.required}
-                            />
-                        </div>
-                        <div className="col-md-4">
-                            <span>Thời gian</span>
-                            <DateTimeInput selected={new Date()}
-                                isDefaultEmpty
-                                isPortal
-                                id="startDate" isOnlyDate={false} onChange={(data) => {
+                <div class="form-group col-md-4">
+                    <span for="">Ưu tiên</span>
+                    <PrioritySelect isDisabled={isDisabledControl()} value={modelData?.priorityID} data={componentData.uutien} onChange={(data) => {
+                        overwriteModel('priorityID', data)
+                    }} />
+                </div>
+                <div className="form-group col-md-4">
+                    <span>Loại Yêu cầu</span>
+                    <SelectBox id="selectbox"
+                        isDisabled={isDisabledControl()}
+                        optionLabel="master_name"
+                        optionValue="id"
+                        onChange={(data) => {
+                            overwriteModel('type_req_ID', data)
+                        }}
+                        value={modelData?.type_req_ID}
+                        isPortal
+                        options={componentData.loaiyeucau}
+                    />
+                </div>
+                <div className="form-group col-md-4">
+                    <span>Tên khách hàng</span>
+                    <InputControl disabled={isDisabledControl()} type="text" id="name" onChange={(e) => {
+                        const value = e.target.value ?? '';
+                    }} defaultValue={null} />
+                </div>
+                <div className="form-group col-md-4">
+                    <span>Tên yêu cầu</span>
+                    <InputControl disabled={isDisabledControl()} type="text" id="name" onChange={(e) => {
+                        const value = e.target.value ?? '';
+                    }} defaultValue={null} />
+                </div>
+                <div className="form-group col-md-4">
+                    <span>Yêu cầu</span>
+                    <SelectBox id="selectbox"
+                        isDisabled={isDisabledControl()}
+                        optionLabel="master_name"
+                        optionValue="id"
+                        onChange={(data) => {
+                            overwriteModel('type_req_ID', data)
+                        }}
+                        value={modelData?.type_req_ID}
+                        isPortal
+                        options={componentData.yeucau}
+                    />
+                </div>
+                <div className="form-group col-md-4">
+                    <span>Thời gian</span>
+                    <DateTimeInput selected={new Date()}
+                        isDefaultEmpty
+                        disabled={isDisabledControl()}
+                        isPortal
+                        id="startDate" isOnlyDate={false} onChange={(data) => {
 
-                                }} />
-                        </div>
-                        <div className="col-md-4">
-                            <span>Địa điểm</span>
-                            <InputControl type="text" id="name" onChange={(e) => {
-                                const value = e.target.value ?? '';
-                            }} defaultValue={null} />
-                        </div>
-                        <div className="col-md-4">
-                            <span>Mô tả</span>
-                            <InputControl type="text" id="name" onChange={(e) => {
-                                const value = e.target.value ?? '';
-                            }} defaultValue={null} />
-                        </div>
-                        <div className="col-md-4">
-                            <span>Nộp quỹ</span>
-                            <SelectBox id="selectbox"
-                                optionLabel="name"
-                                optionValue="id"
-                                onChange={(data) => {
-                                }}
-                                value={null}
-                                isPortal
-                                options={masterData.question}
-                            />
-                        </div>
-                    </div>
+                        }} />
+                </div>
+                <div className="form-group col-md-4">
+                    <span>Địa điểm</span>
+                    <InputControl disabled={isDisabledControl()} type="text" id="name" onChange={(e) => {
+                        const value = e.target.value ?? '';
+                    }} defaultValue={null} />
+                </div>
+                <div className="form-group col-md-4">
+                    <span>Nộp quỹ</span>
+                    <SelectBox disabled={isDisabledControl()} id="selectbox"
+                        optionLabel="name"
+                        optionValue="id"
+                        onChange={(data) => {
+                        }}
+                        value={null}
+                        isPortal
+                        options={[{ id: true, name: 'Có' }, { id: false, name: 'Không' }]}
+                    />
+                </div>
+                <div className="form-group col-md-12">
+                    <span>Mô tả</span>
+                    <InputControl disabled={isDisabledControl()} type="textarea" id="name" onChange={(e) => {
+                        const value = e.target.value ?? '';
+                    }} defaultValue={null} />
+                </div>
+            </div>
 
-                    <div className='form-row row'>
-                        <div className="col-md-4">
-                            <span>Loại tiền</span>
-                            <GroupBoxComponent
-                                isShowTextBox={true}
-                                setData={setTypeCurrencyData}
-                                data={modelData.typeCurrency} />
-                        </div>
-                        <div className="col-md-4">
-                            <span>Người liên quan</span>
-                            <GroupBoxComponent
-                                isShowTextBox={false}
-                                setData={setTypeRelatedUserData}
-                                data={modelData.relatedUser} />
-                        </div>
-                        <div className="col-md-4">
-                            <span>Chuyển thực thi</span>
-                            {
-                                masterData.city?.map(item => {
-                                    return (
-                                        <div class="form-check">
-                                            <input
-                                                type="radio"
-                                                class="form-check-input"
-                                                id={`radio_${item.id}`}
-                                                name={`thucthi_${id}`}
-                                            />
-                                            {item?.name}
-                                            <label class="form-check-label" for={`radio_${item.id}`}></label>
-                                        </div>
-                                    )
-                                })
-                            }
-                        </div>
-                    </div>
+            <div className='form-row row'>
+                <div class="form-group col-lg-4">
+                    <label for="">Loại tiền</label>
+                    <GroupBoxComponent
+                        disabled={isDisabledControl()}
+                        isShowTextBox={true}
+                        setData={setTypeCurrencyData}
+                        data={componentData.loaitien} />
+                </div>
+                <div class="form-group col-lg-4">
+                    <label for="">Người liên quan</label>
+                    <GroupBoxComponent
+                        onSearch={onSearchRelatedUser}
+                        disabled={isDisabledControl()}
+                        isShowTextBox={false}
+                        setData={setTypeRelatedUserData}
+                        data={componentData?.nguoilienquan} />
+                </div>
+                <div className="form-group col-lg-4">
+                    <label>Chuyển thực thi</label>
+                    {
+                        componentData.khuvuc?.map(item => {
+                            return (
+                                <div class="form-check">
+                                    <input
+                                        disabled={isDisabledControl()}
+                                        type="radio"
+                                        value={item?.id}
+                                        checked={modelData?.chuyenthucthi_ID === item?.id}
+                                        class="form-check-input"
+                                        id={`radio_${item.id}`}
+                                        name={`thucthi_${id}`}
+                                        onChange={(e) => {
+                                            overwriteModel('chuyenthucthi_ID', item?.id)
+                                        }}
+                                    />
+                                    &nbsp;{item?.name}
+                                    <label class="form-check-label" for={`radio_${item.id}`}></label>
+                                </div>
+                            )
+                        })
+                    }
                 </div>
             </div>
             {

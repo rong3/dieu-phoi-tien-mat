@@ -35,27 +35,26 @@ function ContainerComponent(props) {
                     {
                         props?.id &&
                         <div class="wrap-header">
-                            <p class="title">Mã yêu cầu: {props?.id}</p>
+                            <p class="title">Mã yêu cầu: {settingModal.data?.req_code}</p>
                         </div>
                     }
 
                     <div class="wrap-body">
                         <div class="infor-created">
-                            <div class="title-created">
+                            <div class="title-created active">
                                 <p>Thông tin người tạo</p>
                             </div>
-                            <form class="wrap-form" action="">
+                            <form class="wrap-form" style={{ display: 'block' }}>
                                 <div class="form-row">
                                     <div class="form-group col-lg-4">
                                         <label for="">Người tạo yêu cầu:</label>
-                                        <input class="form-control" type="text" value="Phạm Ngọc Thanh Hương" />
+                                        <input class="form-control" disabled type="text" style={{ color: '#000 !important', opacity: '1 !important' }} value="Trần Hoàng Triều" />
                                     </div>
-
                                 </div>
                             </form>
                         </div>
-                        <TaskContainer id={""} modalData={settingModal} />
-                        <HistoryStep />
+                        <TaskContainer id={props?.id} modalData={settingModal} setModelData={setSettingModal} />
+                        {/* <HistoryStep /> */}
                     </div>
                 </div>
             </section>
