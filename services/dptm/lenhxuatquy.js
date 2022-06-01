@@ -24,10 +24,10 @@ export const GetLXQById = (id) => {
     );
 }
 
-export const GetLXQ = () => {
+export const GetLXQ = (type) => {
     return request(
         'GET',
-        `LXQ/GetLXQ`,
+        `LXQ/GetLXQ?type=${type}`,
         'vi'
     );
 }

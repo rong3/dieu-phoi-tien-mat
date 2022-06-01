@@ -6,11 +6,17 @@ import VehicleRequiredComponent from "../../../taskManage/subcomponent/vehicle/s
 import VehicleReleaseContainer from "../../../taskManage/subcomponent/vehicleRelease/component/vehicleReleaseContainer/vehicleReleaseContainer"
 import { TaskCategory } from "./taskCategory"
 import { GetYCTiepNopQuyById } from "../../../../services/dptm/yeucautiepnopquy"
+import { GetYCXeById } from "../../../../services/dptm/yeucauxe"
 import { GetLXQById } from "../../../../services/dptm/lenhxuatquy"
+import { useAuth } from "../../../../shared/packages/provider/authBase"
+import { useDispatch, useSelector } from "react-redux";
+import { loadCaptren } from "../../../../redux/actions/masterDataAction"
 
 function TaskContainer(props) {
     const { id, modalData, setModelData } = props;
     const router = useRouter();
+    const dispatch = useDispatch();
+    const auth = useAuth();
     const [selectedType, setSelectedType] = useState(null)
     const [remoteData, setRemoteData] = useState({
         model: null
@@ -20,13 +26,22 @@ function TaskContainer(props) {
         setSelectedType(modalData.category ?? TaskCategory.TIEPNOPQUY);
     }, [modalData])
 
+    useEffect(() => {
+        if (auth?.user) {
+            dispatch(loadCaptren({
+                manv: auth?.user?.manv
+            }));
+        }
+    }, [auth?.user])
+
+
 
     const renderType = (type) => {
         switch (type) {
             case TaskCategory.TIEPNOPQUY: return <TicketRequiredComponent remoteData={remoteData} {...props} />
-            case TaskCategory.LENHXUATQUY: return <FundReleaseContainer fromContainer={true} {...props} />
-            case TaskCategory.HOTROXE: return <VehicleRequiredComponent {...props} />
-            case TaskCategory.PHIEUHOTROXE: return <VehicleReleaseContainer {...props} />
+            case TaskCategory.LENHXUATQUY: return <FundReleaseContainer parentData={modalData} setParentData={setModelData} fromContainer={true} {...props} />
+            case TaskCategory.HOTROXE: return <VehicleRequiredComponent remoteData={remoteData} {...props} />
+            case TaskCategory.PHIEUHOTROXE: return <VehicleReleaseContainer  parentData={modalData} setParentData={setModelData} fromContainer={true} {...props} />
             default: return <></>
         }
     }
@@ -35,9 +50,18 @@ function TaskContainer(props) {
         if (id) {
             if (selectedType === TaskCategory.TIEPNOPQUY) {
                 GetYCTiepNopQuyById(id).then((res) => {
-                    remoteData.model = res?.data ?? null
+                    const data = res?.data;
+                    remoteData.model = data ?? null
                     setRemoteData({ ...remoteData })
-                    setModelData({ ...modalData, data: { ...res?.data } })
+                    setModelData({ ...modalData, data: { ...data } })
+                }).catch(() => { })
+            }
+            if (selectedType === TaskCategory.HOTROXE) {
+                GetYCXeById(id).then((res) => {
+                    const data = res?.data;
+                    remoteData.model = data ?? null
+                    setRemoteData({ ...remoteData })
+                    setModelData({ ...modalData, data: { ...data } })
                 }).catch(() => { })
             }
         }

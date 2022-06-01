@@ -7,8 +7,8 @@ export const TaskCategory = {
 
 export const TypeCategory = {
     TAOYC: 'TAOYC',
-    YCDEN: 'YCDEN',
-    YCDI: 'YCDI',
-    YCNHAP: 'YCNHAP',
-    YCLIENQUAN: 'YCLIENQUAN'
+    YCDEN: 'in',
+    YCDI: 'out',
+    YCNHAP: 'draft',
+    YCLIENQUAN: 'relate'
 }

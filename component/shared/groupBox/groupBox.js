@@ -39,7 +39,7 @@ function GroupBoxComponent(props) {
                                                     onChange={(e) => {
                                                         const checked = e?.target?.checked;
                                                         item.checked = checked;
-                                                        setData(data);
+                                                        setData([...data]);
                                                     }}
                                                     checked={item.checked} />
                                             </div>
@@ -57,7 +57,7 @@ function GroupBoxComponent(props) {
                                             <InputControl disabled={!item.checked || disabled === true} type="number" id="name" onChange={(e) => {
                                                 const value = e.target.value ?? null;
                                                 item.data = value;
-                                                setData(data);
+                                                setData([...data]);
                                             }} defaultValue={item?.data} />
                                         </div>
                                     }

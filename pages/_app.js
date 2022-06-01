@@ -58,6 +58,7 @@ function Default({ Component, pageProps }) {
 
     dispatch(loadDSNV3KV({
     }));
+
   }, [])
 
   useEffect(() => {

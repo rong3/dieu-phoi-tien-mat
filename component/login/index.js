@@ -15,7 +15,7 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(false);
     const { addToast } = useToasts();
     const [credential, setCredential] = useState({
-        email: null,
+        username: null,
         password: null
     })
 
@@ -89,7 +89,7 @@ const Login = () => {
                                         <label for="">Tên Đăng Nhập</label>
                                         <input class="form-control" type="text" onChange={(e) => {
                                             const value = e?.target?.value;
-                                            credential.email = value;
+                                            credential.username = value;
                                             setCredential({ ...credential });
                                         }}
                                             onKeyPress={event => {

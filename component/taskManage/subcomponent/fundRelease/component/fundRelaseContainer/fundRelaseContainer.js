@@ -9,13 +9,15 @@ import { useToasts } from "react-toast-notifications";
 import PrioritySelect from "../../../../../common/PrioritySelect/PrioritySelect"
 import { GetLXQById, UpdateLXQById, UpdateStatusLXQ, PostLXQ } from "../../../../../../services/dptm/lenhxuatquy"
 import { GetYCTiepNopQuy } from "../../../../../../services/dptm/yeucautiepnopquy"
+import { removeAccents } from "../../../../../../services/dptm/commonService"
+import { useAuth } from "../../../../../../shared/packages/provider/authBase"
 
 function FundReleaseContainer(props) {
-    const { id, selected } = props;
+    const { id, selected, parentData, setParentData } = props;
     const router = useRouter()
     const { addToast } = useToasts();
-
-    const { masterData, relatedUser, dsnv3kv } = useSelector((state) => state.masterData);
+    const auth = useAuth();
+    const { masterData, relatedUser, dsnv3kv, captren } = useSelector((state) => state.masterData);
     const [componentData, setComponentData] = useState({
         dvkd: [],
         loaiyeucau: [],
@@ -42,6 +44,9 @@ function FundReleaseContainer(props) {
             GetLXQById(id).then((res) => {
                 const data = res?.data ?? null;
                 if (data) {
+                    if (parentData && setParentData) {
+                        setParentData({ ...parentData, data: { ...data } })
+                    }
                     setModelData({ ...modelData, ...data })
                 }
             })
@@ -63,7 +68,7 @@ function FundReleaseContainer(props) {
 
     useEffect(() => {
         try {
-            if (relatedUser && masterData?.length > 0 && dsnv3kv) {
+            if (relatedUser?.length > 0 && masterData?.length > 0 && dsnv3kv) {
                 //get list don vi kinh doanh
                 const dvkdList = masterData?.filter(x => x?.category === 'dvkd')?.sort((a, b) => a?.master_name - b?.master_name)?.map((item) => ({
                     id: item?.id,
@@ -77,6 +82,7 @@ function FundReleaseContainer(props) {
                 const currencyList = masterData?.filter(x => x?.category === 'loaitien')?.map((item) => {
                     return {
                         id: item?.id,
+                        primaryId: null,
                         name: item?.master_name,
                         data: null,
                         checked: false
@@ -144,29 +150,67 @@ function FundReleaseContainer(props) {
                 componentData.uutien = priorityList;
                 componentData.trangthai = statusList;
                 componentData.nguoilienquan = relatedUserList;
-
-                const findMerger = relatedUser?.find(x => x?.maNhanVien === modelData?.nguoi_lien_quan_id);
-                if (findMerger) {
-                    componentData.nguoilienquan2 = [
-                        {
-                            id: findMerger?.maNhanVien,
-                            name: `${findMerger?.maNhanVien} ${findMerger?.hoTenDemNhanVien} ${findMerger?.tenNhanVien} - ${findMerger?.tenChucDanhMoiNhat}`,
-                            checked: true
-                        }
-                        , ...relatedUserList?.filter(x => x.id !== modelData?.nguoi_lien_quan_id)];
-                }
-                else {
-                    componentData.nguoilienquan2 = relatedUserList;
-                }
                 componentData.baove = baoveList;
                 componentData.kiemngan = kiemnganList;
                 componentData.taixe = taixeList;
-                setComponentData({ ...componentData });
+
                 //default value
+                if (modelData) {
+                    modelData?.masterAttributes?.map((x) => {
+                        const find = componentData.loaitien?.find(m => m.id === x?.master_id) ?? null
+                        if (find) {
+                            const convertAttributes = JSON.parse(x?.attributes) ?? null;
+                            if (convertAttributes) {
+                                find.primaryId = x?.id;
+                                find.data = convertAttributes?.amount;
+                                find.checked = convertAttributes?.checked ?? false
+                            }
+                        }
+                    })
+
+                    setModelData({
+                        ...modelData, nguoiLienQuan: [
+                            ...(modelData?.nguoiLienQuan ?? [])?.map((x) => {
+                                const find = relatedUser?.find(m => m?.maNhanVien === x?.nguoiLienQuan_ID || m?.maNhanVien === x?.id) ?? null
+                                return {
+                                    id: find?.maNhanVien,
+                                    name: `${find?.maNhanVien} ${find?.hoTenDemNhanVien} ${find?.tenNhanVien} - ${find?.tenChucDanhMoiNhat}`,
+                                    checked: true
+                                }
+                            })
+                        ]
+                    })
+
+                    componentData.nguoilienquan = [...relatedUser.filter(x => modelData?.nguoiLienQuan?.map(m => m?.nguoiLienQuan_ID || m?.id)?.includes(x?.maNhanVien))?.map((item => ({
+                        id: item?.maNhanVien,
+                        name: `${item?.maNhanVien} ${item?.hoTenDemNhanVien} ${item?.tenNhanVien} - ${item?.tenChucDanhMoiNhat}`,
+                        checked: true
+                    })))
+                        , ...componentData.nguoilienquan?.filter(x => !modelData?.nguoiLienQuan?.map(y => y.nguoiLienQuan_ID)?.includes(x?.id))];
+                }
+
+                setComponentData({ ...componentData });
             }
         }
         catch (err) { console.log({ err }); }
-    }, [masterData, relatedUser, dsnv3kv, modelData?.nguoi_lien_quan_id])
+    }, [masterData, relatedUser, dsnv3kv, modelData?.id])
+
+    useEffect(() => {
+        const findMerger = relatedUser?.find(x => x?.maNhanVien === modelData?.nguoi_lien_quan_id);
+        if (findMerger) {
+            componentData.nguoilienquan2 = [
+                {
+                    id: findMerger?.maNhanVien,
+                    name: `${findMerger?.maNhanVien} ${findMerger?.hoTenDemNhanVien} ${findMerger?.tenNhanVien} - ${findMerger?.tenChucDanhMoiNhat}`,
+                    checked: true
+                }
+                , ...componentData.nguoilienquan?.filter(x => x.id !== modelData?.nguoi_lien_quan_id)];
+        }
+        else {
+            componentData.nguoilienquan2 = [...componentData.nguoilienquan];
+        }
+        setComponentData({ ...componentData });
+    }, [modelData?.nguoi_lien_quan_id, relatedUser])
 
     const findStatus = (statusName) => {
         const find = componentData.trangthai?.find(x => x.code === statusName) ?? null
@@ -186,7 +230,7 @@ function FundReleaseContainer(props) {
 
     const isDisabledControl = () => {
         const status = findStatusByID(modelData?.status)?.code ?? null
-        if (['approved', 'waitapproved', 'cancel', 'received', 'inprogress'].includes(status)) {
+        if (['approved', 'waitapproved', 'cancel', 'received', 'complete'].includes(status)) {
             return true
         }
         return false;
@@ -197,8 +241,9 @@ function FundReleaseContainer(props) {
         modelData.masterAttributes = data;
         setModelData({ ...modelData });
     }
+
     const setTypeRelatedUserData = (data) => {
-        modelData.nguoiLienQuan = data;
+        modelData.nguoiLienQuan = data?.filter(x => x?.checked);
         setModelData({ ...modelData });
     }
 
@@ -216,7 +261,7 @@ function FundReleaseContainer(props) {
             }
             else {
                 const relatedUserList = [...relatedUser?.filter(x => !modelData?.nguoiLienQuan?.map(x => x?.id)?.includes(x?.maNhanVien)
-                    && (x.maNhanVien?.toLowerCase()?.indexOf(data?.toLowerCase()) !== -1 || (x?.hoTenDemNhanVien + ' ' + x?.tenNhanVien)?.toLowerCase()?.indexOf(data?.toLowerCase()) !== -1))?.map(x => ({
+                    && (removeAccents(x.maNhanVien)?.toLowerCase()?.indexOf(removeAccents(data)?.toLowerCase()) !== -1 || removeAccents((x?.hoTenDemNhanVien + ' ' + x?.tenNhanVien))?.toLowerCase()?.indexOf(removeAccents(data)?.toLowerCase()) !== -1))?.map(x => ({
                         id: x?.maNhanVien,
                         name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
                         checked: x?.checked ?? false
@@ -248,8 +293,19 @@ function FundReleaseContainer(props) {
         }
     }
 
+    const roleButton = (type) => {
+        const roleData = modelData?.quanlytructiep === auth?.user?.manv ? 'qltt' : 'user';
+        if (['qltt'].includes(roleData)) {
+            return ['addition', 'approved', 'complete']?.includes(type)
+        }
+        if (['user'].includes(roleData)) {
+            return ['update', 'waitapproved', 'draft', 'add']?.includes(type)
+        }
+        return true;
+    }
+
     const typeButtonRender = (type) => {
-        if (type === 'draft') {
+        if (type === 'draft' && roleButton(type)) {
             return <button class="btn btn-draw" style={{ marginLeft: '16px' }} type="button" tabindex="0" onClick={() => {
                 const draftId = findStatus('draft')?.id;
                 if (draftId) {
@@ -261,7 +317,7 @@ function FundReleaseContainer(props) {
                 <span>Lưu nháp</span>
             </button>
         }
-        if (type === 'add') {
+        if (type === 'add' && roleButton(type)) {
             return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0"
                 onClick={() => {
                     const statusId = findStatus("waitapproved")?.id;
@@ -277,7 +333,7 @@ function FundReleaseContainer(props) {
                 </span>
             </button>
         }
-        if (type === 'update') {
+        if (type === 'update' && roleButton(type)) {
             return <button class="btn btn-draw" style={{ marginLeft: '16px' }} type="button" tabindex="0" onClick={() => {
                 updateLXQ(modelData)
             }}>
@@ -285,7 +341,7 @@ function FundReleaseContainer(props) {
                 <span>Cập nhật</span>
             </button>
         }
-        if (type === 'waitapproved') {
+        if (type === 'waitapproved' && roleButton(type)) {
             return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0" onClick={() => {
                 const statusId = findStatus("waitapproved")?.id;
                 if (statusId) {
@@ -298,7 +354,7 @@ function FundReleaseContainer(props) {
             </button>
         }
 
-        if (type === 'addition') {
+        if (type === 'addition' && roleButton(type)) {
             return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0" onClick={() => {
                 const statusId = findStatus("addition")?.id;
                 if (statusId) {
@@ -311,7 +367,7 @@ function FundReleaseContainer(props) {
             </button>
         }
 
-        if (type === 'approved') {
+        if (type === 'approved' && roleButton(type)) {
             return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0" onClick={() => {
                 const statusId = findStatus("approved")?.id;
                 if (statusId) {
@@ -324,7 +380,7 @@ function FundReleaseContainer(props) {
             </button>
         }
 
-        if (type === 'complete') {
+        if (type === 'complete' && roleButton(type)) {
             return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0" onClick={() => {
                 const statusId = findStatus("complete")?.id;
                 if (statusId) {
@@ -340,7 +396,7 @@ function FundReleaseContainer(props) {
 
     const insertLXQ = (model) => {
         const convertModel = {
-            lxq: { ...model },
+            lxq: { ...model, quanlytructiep: captren?.maNhanVien, submit_by: auth?.user?.manv },
             MasterAttributes: model?.masterAttributes?.map(y => {
                 return {
                     "master_id": y?.id,
@@ -387,11 +443,11 @@ function FundReleaseContainer(props) {
 
     const updateLXQ = (model) => {
         const convertModel = {
-            LXQ: { ...model },
+            LXQ: { ...model, quanlytructiep: captren?.maNhanVien },
             MasterAttributes: model?.masterAttributes?.map(y => {
                 return {
-                    "master_id": y?.id,
-                    "attributes": JSON.stringify({
+                    "id": y?.primaryId ?? y?.id,
+                    "attributes": y?.attributes ?? JSON.stringify({
                         amount: y?.data ? Number.parseInt(y?.data) : null,
                         checked: y?.checked ?? false
                     })
@@ -447,13 +503,21 @@ function FundReleaseContainer(props) {
                         </div>
                     }
                     <div className="form-row row">
-                        <div class="form-group col-md-6">
+                        <div class="form-group col-md-4">
                             <span>Ưu tiên</span>
                             <PrioritySelect isDisabled={isDisabledControl()} value={modelData?.priorityID} data={componentData.uutien} onChange={(data) => {
                                 overwriteModel('priorityID', data)
                             }} />
                         </div>
-                        <div className="form-group col-lg-6">
+                        <div class="form-group col-lg-4">
+                            <span>Quản lý trực tiếp</span>
+                            <InputControl disabled={true} type="text" id="quanlytructiep"
+                                defaultValue={modelData?.quanlytructiep ?
+                                    `${modelData?.quanlytructiep}`
+                                    : `${captren?.maNhanVien} - ${captren?.hoTenDemNhanVien} ${captren?.tenNhanVien} - ${captren?.tenChucDanhMoiNhat}`}
+                            />
+                        </div>
+                        <div className="form-group col-lg-4">
                             <span>Loại Yêu cầu</span>
                             <SelectBox id="selectbox"
                                 isDisabled={isDisabledControl()}
@@ -630,7 +694,7 @@ function FundReleaseContainer(props) {
                                         }
                                         else {
                                             const relatedUserList = [...relatedUser?.filter(x =>
-                                                (x.maNhanVien?.toLowerCase()?.indexOf(data?.toLowerCase()) !== -1 || (x?.hoTenDemNhanVien + ' ' + x?.tenNhanVien)?.toLowerCase()?.indexOf(data?.toLowerCase()) !== -1))?.map(x => ({
+                                                (removeAccents(x.maNhanVien)?.toLowerCase()?.indexOf(removeAccents(data)?.toLowerCase()) !== -1 || removeAccents((x?.hoTenDemNhanVien + ' ' + x?.tenNhanVien))?.toLowerCase()?.indexOf(removeAccents(data)?.toLowerCase()) !== -1))?.map(x => ({
                                                     id: x?.maNhanVien,
                                                     name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
                                                 }))]

@@ -11,10 +11,14 @@ import { useToasts } from "react-toast-notifications";
 import { TaoMoiYCTiepNopQuy, CapNhatYCTiepNopQuy, UpdateStatusYCTiepNopQuy } from "../../../../../../services/dptm/yeucautiepnopquy"
 import { PostLXQQuantity } from "../../../../../../services/dptm/lenhxuatquy"
 import Modal from "../../../../../../shared/packages/control/modal/index";
+import { removeAccents } from "../../../../../../services/dptm/commonService"
+import { TaskCategory, TypeCategory } from "../../../../../dashboard/common/taskContainer/taskCategory"
+import { useAuth } from "../../../../../../shared/packages/provider/authBase"
 
 function TicketRequiredComponent(props) {
     const { id, remoteData } = props;
     const { addToast } = useToasts();
+    const auth = useAuth();
     const router = useRouter();
     const [modal, setModal] = useState({
         isOpen: false,
@@ -27,7 +31,8 @@ function TicketRequiredComponent(props) {
         data: null,
         type: null
     })
-    const { masterData, relatedUser } = useSelector((state) => state.masterData);
+
+    const { masterData, relatedUser, captren } = useSelector((state) => state.masterData);
     const [componentData, setComponentData] = useState({
         dvkd: [],
         loaiyeucau: [],
@@ -69,6 +74,7 @@ function TicketRequiredComponent(props) {
                 const currencyList = masterData?.filter(x => x?.category === 'loaitien')?.map((item) => {
                     return {
                         id: item?.id,
+                        primaryId: null,
                         name: item?.master_name,
                         data: null,
                         checked: false
@@ -127,6 +133,7 @@ function TicketRequiredComponent(props) {
                         if (find) {
                             const convertAttributes = JSON.parse(x?.attributes) ?? null;
                             if (convertAttributes) {
+                                find.primaryId = x?.id;
                                 find.data = convertAttributes?.amount;
                                 find.checked = convertAttributes?.checked ?? false
                             }
@@ -157,8 +164,6 @@ function TicketRequiredComponent(props) {
         setComponentData({ ...componentData });
     }, [modelData?.nguoiLienQuan])
 
-
-
     const overwriteModel = (key, value) => {
         modelData[key] = value;
         setModelData({ ...modelData })
@@ -166,7 +171,7 @@ function TicketRequiredComponent(props) {
 
     //func for groupbox
     const setTypeCurrencyData = (data) => {
-        modelData.typeCurrency = data;
+        modelData.masterAttributes = data;
         setModelData({ ...modelData });
     }
     const setTypeRelatedUserData = (data) => {
@@ -200,8 +205,8 @@ function TicketRequiredComponent(props) {
 
     const insertTicketRequired = (model) => {
         const convertModel = {
-            ...model,
-            masterAttributes: model?.typeCurrency?.map(y => {
+            ycTiepNopQuy: { ...model, quanlytructiep: captren?.maNhanVien, submit_by: auth?.user?.manv },
+            masterAttributes: model?.masterAttributes?.map(y => {
                 return {
                     "master_id": y?.id,
                     "category": "NopQuy",
@@ -211,19 +216,19 @@ function TicketRequiredComponent(props) {
                     })
                 }
             }),
-            nguoiLienQuan: model?.nguoiLienQuan?.map(y => {
+            nguoiLienQuan: model?.nguoiLienQuan?.filter(x => x?.checked)?.map(y => {
                 return {
                     "nguoiLienQuan_ID": y?.id,
                     "category": "NopQuy"
                 }
             }),
         }
-        console.log({ convertModel });
+
         TaoMoiYCTiepNopQuy(convertModel).then((res) => {
             addToast(<div className="text-center">
                 Lưu thành công
             </div>, { appearance: 'success' });
-            router.replace("/")
+            router.replace(`/?typeCategory=${TypeCategory.YCDEN}&category=${TaskCategory.TIEPNOPQUY}`)
         }).catch((err) => {
             addToast(<div className="text-center">
                 Lưu thất bại
@@ -233,18 +238,19 @@ function TicketRequiredComponent(props) {
 
     const updateTicketRequired = (model) => {
         const convertModel = {
-            ...model,
-            masterAttributes: model?.typeCurrency?.map(y => {
+            ycTiepNopQuy: { ...model, quanlytructiep: captren?.maNhanVien },
+            masterAttributes: model?.masterAttributes?.map(y => {
                 return {
-                    "master_id": y?.id,
+                    "id": y?.primaryId ?? y?.id,
+                    // "master_id": y?.master_id ?? ,
                     "category": "NopQuy",
-                    "attributes": JSON.stringify({
+                    "attributes": y?.attributes ?? JSON.stringify({
                         amount: y?.data ? Number.parseInt(y?.data) : null,
                         checked: y?.checked ?? false
                     })
                 }
             }),
-            nguoiLienQuan: model?.nguoiLienQuan?.map(y => {
+            nguoiLienQuan: model?.nguoiLienQuan?.filter(x => x?.checked)?.map(y => {
                 return {
                     "nguoiLienQuan_ID": y?.id,
                     "category": "NopQuy"
@@ -252,7 +258,7 @@ function TicketRequiredComponent(props) {
             }),
         }
         console.log({ convertModel });
-        CapNhatYCTiepNopQuy(id, convertModel).then((res) => {
+        CapNhatYCTiepNopQuy(convertModel).then((res) => {
             addToast(<div className="text-center">
                 Cập nhật thành công
             </div>, { appearance: 'success' });
@@ -295,8 +301,19 @@ function TicketRequiredComponent(props) {
         }
     }
 
+    const roleButton = (type) => {
+        const roleData = modelData?.quanlytructiep === auth?.user?.manv ? 'qltt' : 'user';
+        if (['qltt'].includes(roleData)) {
+            return ['addition', 'approved']?.includes(type)
+        }
+        if (['user'].includes(roleData)) {
+            return ['update', 'waitapproved', 'inprogress', 'received', 'cancel', 'taolxq', 'draft', 'add']?.includes(type)
+        }
+        return true;
+    }
+
     const typeButtonRender = (type) => {
-        if (type === 'draft') {
+        if (type === 'draft' && roleButton(type)) {
             return <button class="btn btn-draw" style={{ marginLeft: '16px' }} type="button" tabindex="0" onClick={() => {
                 const draftId = findStatus('draft')?.id;
                 if (draftId) {
@@ -309,7 +326,7 @@ function TicketRequiredComponent(props) {
             </button>
         }
 
-        if (type === 'waitapproved') {
+        if (type === 'waitapproved' && roleButton(type)) {
             return <button class="btn btn-draw" style={{ marginLeft: '16px' }} type="button" tabindex="0" onClick={() => {
                 const statusId = findStatus("waitapproved")?.id;
                 if (statusId) {
@@ -321,7 +338,7 @@ function TicketRequiredComponent(props) {
                 <span>Chuyển duyệt</span>
             </button>
         }
-        if (type === 'add') {
+        if (type === 'add' && roleButton(type)) {
             return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0"
                 onClick={() => {
                     const statusId = findStatus("waitapproved")?.id;
@@ -337,7 +354,7 @@ function TicketRequiredComponent(props) {
                 </span>
             </button>
         }
-        if (type === 'update') {
+        if (type === 'update' && roleButton(type)) {
             return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0"
                 onClick={() => {
                     if (id) {
@@ -351,7 +368,7 @@ function TicketRequiredComponent(props) {
                 </span>
             </button>
         }
-        if (type === 'addition') {
+        if (type === 'addition' && roleButton(type)) {
             return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0"
                 onClick={() => {
                     const statusId = findStatus("addition")?.id;
@@ -367,7 +384,7 @@ function TicketRequiredComponent(props) {
                 </span>
             </button>
         }
-        if (type === 'approved') {
+        if (type === 'approved' && roleButton(type)) {
             return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0"
                 onClick={() => {
                     const statusId = findStatus("inprogress")?.id;
@@ -383,7 +400,7 @@ function TicketRequiredComponent(props) {
                 </span>
             </button>
         }
-        if (type === 'inprogress') {
+        if (type === 'inprogress' && roleButton(type)) {
             return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0"
                 onClick={() => {
                     const statusId = findStatus("received")?.id;
@@ -399,7 +416,7 @@ function TicketRequiredComponent(props) {
                 </span>
             </button>
         }
-        if (type === 'cancel') {
+        if (type === 'cancel' && roleButton(type)) {
             return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0"
                 onClick={() => {
                     setModal({ ...modal, isOpen: true, data: { lydotuchoi: null } })
@@ -411,7 +428,7 @@ function TicketRequiredComponent(props) {
                 </span>
             </button>
         }
-        if (type === 'received') {
+        if (type === 'received' && roleButton(type)) {
             return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0"
                 onClick={() => {
                     const statusId = findStatus("received")?.id;
@@ -427,7 +444,7 @@ function TicketRequiredComponent(props) {
                 </span>
             </button>
         }
-        if (type === 'taolxq') {
+        if (type === 'taolxq' && roleButton(type)) {
             return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0"
                 onClick={() => {
                     setModalLXQ({ ...modalLXQ, isOpen: true, data: { quantity: null } })
@@ -455,7 +472,7 @@ function TicketRequiredComponent(props) {
             }
             else {
                 const relatedUserList = [...relatedUser?.filter(x => !modelData?.nguoiLienQuan?.map(x => x?.id)?.includes(x?.maNhanVien)
-                    && (x.maNhanVien?.toLowerCase()?.indexOf(data?.toLowerCase()) !== -1 || (x?.hoTenDemNhanVien + ' ' + x?.tenNhanVien)?.toLowerCase()?.indexOf(data?.toLowerCase()) !== -1))?.map(x => ({
+                    && (removeAccents(x.maNhanVien)?.toLowerCase()?.indexOf(removeAccents(data)?.toLowerCase()) !== -1 || removeAccents((x?.hoTenDemNhanVien + ' ' + x?.tenNhanVien))?.toLowerCase()?.indexOf(removeAccents(data)?.toLowerCase()) !== -1))?.map(x => ({
                         id: x?.maNhanVien,
                         name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
                         checked: x?.checked ?? false
@@ -494,6 +511,14 @@ function TicketRequiredComponent(props) {
                     <PrioritySelect isDisabled={isDisabledControl()} value={modelData?.priorityID} data={componentData.uutien} onChange={(data) => {
                         overwriteModel('priorityID', data)
                     }} />
+                </div>
+                <div class="form-group col-lg-4">
+                    <label for="">Quản lý trực tiếp</label>
+                    <InputControl disabled={true} type="text" id="quanlytructiep"
+                        defaultValue={modelData?.quanlytructiep ?
+                            `${modelData?.quanlytructiep}`
+                            : `${captren?.maNhanVien} - ${captren?.hoTenDemNhanVien} ${captren?.tenNhanVien} - ${captren?.tenChucDanhMoiNhat}`}
+                    />
                 </div>
                 <div class="form-group col-lg-4">
                     <label for="">ĐVKD yêu cầu</label>

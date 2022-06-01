@@ -5,6 +5,8 @@ export const actionTypes = {
     LOAD_RELATEDUSER_SUCCESS:"LOAD_RELATEDUSER_SUCCESS",
     LOAD_DSNHANVIEN3KHUVUC:"LOAD_DSNHANVIEN3KHUVUC",
     LOAD_DSNHANVIEN3KHUVUC_SUCCESS:"LOAD_DSNHANVIEN3KHUVUC_SUCCESS",
+    LOAD_CAPTREN:"LOAD_CAPTREN",
+    LOAD_CAPTREN_SUCCESS:"LOAD_CAPTREN_SUCCESS",
 };
 
 
@@ -50,6 +52,21 @@ export function loadDSNV3KV(payload) {
 export function loadDSNV3KVSuccess(data) {
     return {
         type: actionTypes.LOAD_DSNHANVIEN3KHUVUC_SUCCESS,
+        payload: data
+    };
+}
+
+export function loadCaptren(payload) {
+    return {
+        type: actionTypes.LOAD_CAPTREN,
+        payload
+    };
+}
+
+
+export function loadCaptrenSuccess(data) {
+    return {
+        type: actionTypes.LOAD_CAPTREN_SUCCESS,
         payload: data
     };
 }

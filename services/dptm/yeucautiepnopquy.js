@@ -1,9 +1,9 @@
 import { request } from '../../shared/packages/service-adapter/axios';
 
-export const GetYCTiepNopQuy = () => {
+export const GetYCTiepNopQuy = (type) => {
     return request(
         'GET',
-        `YCTiepNopQuy/GetYCTiepNopQuy`,
+        `YCTiepNopQuy/GetYCTiepNopQuy?type=${type}`,
         'vi',
     );
 }
@@ -33,7 +33,7 @@ export const UpdateStatusYCTiepNopQuy = (data) => {
     );
 }
 
-export const CapNhatYCTiepNopQuy = (id,data) => {
+export const CapNhatYCTiepNopQuy = (data) => {
     return request(
         'PUT',
         `YCTiepNopQuy/PutYCTiepNopQuy`,

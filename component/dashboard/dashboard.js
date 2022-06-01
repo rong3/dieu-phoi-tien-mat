@@ -5,16 +5,21 @@ import DynamicLink from "../../component/common/DynamicLink/DynamicLink"
 import { TaskCategory, TypeCategory } from "./common/taskContainer/taskCategory"
 import { GetYCTiepNopQuy } from "../../services/dptm/yeucautiepnopquy"
 import { GetLXQ } from "../../services/dptm/lenhxuatquy"
+import { GetYCXe } from "../../services/dptm/yeucauxe"
+import { GetPYCHTX } from "../../services/dptm/phieuychtx"
 import { useDispatch, useSelector } from "react-redux";
+import { Category } from "@material-ui/icons";
 
 function DashBoardComponent(props) {
-    const router = useRouter()
+    const router = useRouter();
+    const dispatch = useDispatch();
     const changeRoute = (route) => {
         router.replace(route ?? "/")
     }
+
     const [selectedData, setSelectedData] = useState({
         category: TaskCategory.TIEPNOPQUY,
-        typeCategory: TypeCategory.YCDEN
+        typeCategory: null
     })
 
     const [componentData, setComponentData] = useState({
@@ -23,45 +28,73 @@ function DashBoardComponent(props) {
 
     const { masterData } = useSelector((state) => state.masterData);
 
-    useEffect(() => {
-        selectedData.category = null;
-        selectedData.typeCategory = null;
-        setSelectedData({ ...selectedData })
-        setTimeout(() => {
-            selectedData.category = TaskCategory.TIEPNOPQUY;
-            selectedData.typeCategory = TypeCategory.YCDEN;
-            setSelectedData({ ...selectedData })
-        }, 0);
-    }, [])
+    // useEffect(() => {
+    //     selectedData.category = null;
+    //     selectedData.typeCategory = null;
+    //     setSelectedData({ ...selectedData })
+    //     setTimeout(() => {
+    //         selectedData.category = TaskCategory.TIEPNOPQUY;
+    //         setSelectedData({ ...selectedData })
+    //     }, 0);
+    // }, [])
 
     useEffect(() => {
-        if (selectedData.category === TaskCategory.TIEPNOPQUY) {
-            GetYCTiepNopQuy().then((res) => {
-                console.log({ res });
-                componentData.datagrid = res?.data ?? [];
-                setComponentData({ ...componentData })
-            }).catch((err) => {
-                console.log({ err });
-            })
-        }
-        if (selectedData.category === TaskCategory.LENHXUATQUY) {
-            GetLXQ().then((res) => {
-                console.log({ res });
-                componentData.datagrid = res?.data ?? [];
-                setComponentData({ ...componentData })
-            }).catch((err) => {
-                console.log({ err });
-            })
+        if (selectedData.typeCategory) {
+            if (selectedData.category === TaskCategory.TIEPNOPQUY) {
+                GetYCTiepNopQuy(selectedData.typeCategory).then((res) => {
+                    console.log({ res });
+                    componentData.datagrid = res?.data ?? [];
+                    setComponentData({ ...componentData })
+                }).catch((err) => {
+                    console.log({ err });
+                })
+            }
+            if (selectedData.category === TaskCategory.LENHXUATQUY) {
+                GetLXQ(selectedData.typeCategory).then((res) => {
+                    console.log({ res });
+                    componentData.datagrid = res?.data ?? [];
+                    setComponentData({ ...componentData })
+                }).catch((err) => {
+                    console.log({ err });
+                })
+            }
+            if (selectedData.category === TaskCategory.HOTROXE) {
+                GetYCXe(selectedData.typeCategory).then((res) => {
+                    console.log({ res });
+                    componentData.datagrid = res?.data ?? [];
+                    setComponentData({ ...componentData })
+                }).catch((err) => {
+                    console.log({ err });
+                })
+            }
+            if (selectedData.category === TaskCategory.PHIEUHOTROXE) {
+                GetPYCHTX(selectedData.typeCategory).then((res) => {
+                    console.log({ res });
+                    componentData.datagrid = res?.data ?? [];
+                    setComponentData({ ...componentData })
+                }).catch((err) => {
+                    console.log({ err });
+                })
+            }
         }
         else {
             componentData.datagrid = [];
             setComponentData({ ...componentData })
         }
-    }, [selectedData])
+    }, [selectedData.typeCategory, selectedData.category])
 
     useEffect(() => {
         if (router?.query?.typeCategory) {
             selectedData.typeCategory = router?.query?.typeCategory;
+            setSelectedData({ ...selectedData })
+        }
+        if (router?.query?.category) {
+            selectedData.category = router?.query?.category;
+            setSelectedData({ ...selectedData })
+        }
+        if (router?.query?.typeCategory === undefined && router?.query?.category === undefined) {
+            selectedData.typeCategory = TypeCategory.YCDEN;
+            selectedData.category = TaskCategory.TIEPNOPQUY;
             setSelectedData({ ...selectedData })
         }
     }, [router?.query])
@@ -139,10 +172,23 @@ function DashBoardComponent(props) {
         )
     }
 
+    const colorEnum = (data) => {
+        if (data === "1") {
+            return "#fff100"
+        }
+        if (data === "2") {
+            return "#8ec320"
+        }
+        if (data === "3") {
+            return "##eb2629"
+        }
+        return null;
+    }
+
     const priorityRender = (value) => {
         const findPriority = masterData?.find(x => x?.id === value);
         if (findPriority) {
-            return <span className="dot" style={{ background: findPriority?.master_attributes ?? "#8ec320" }}>
+            return <span className="dot" style={{ background: colorEnum(findPriority?.extra_data) ?? "#8ec320" }}>
             </span>
         }
         return null;
@@ -165,7 +211,7 @@ function DashBoardComponent(props) {
             editable: false,
             renderCell: (cell) => {
                 return <>
-                    <td>{priorityRender(cell?.row?.priority)}</td>
+                    <td>{priorityRender(cell?.row?.priorityID)}</td>
                     &nbsp;
                     &nbsp;
                     <DynamicLink
@@ -214,7 +260,7 @@ function DashBoardComponent(props) {
             editable: false,
             renderCell: (cell) => {
                 return <td>
-                    <div class="date-time"> <span>{cell?.row?.req_date}</span></div>
+                    <div class="date-time"> <span>{new Date(cell?.row?.req_date)?.toLocaleDateString('vi') ?? ""}</span></div>
                 </td>
             }
         },
@@ -228,11 +274,6 @@ function DashBoardComponent(props) {
             editable: false,
             renderCell: (cell) => {
                 return <>
-                    <td>
-                        <div class="user-avatar">
-                            <img src="/asset/images/icons/avatar.png" alt="" />
-                        </div>
-                    </td>
                     <td>
                         <p>Nguyễn Văn A</p>
                     </td>
@@ -262,7 +303,7 @@ function DashBoardComponent(props) {
             editable: false,
             renderCell: (cell) => {
                 return <>
-                    <td>{priorityRender(cell?.row?.priority)}</td>
+                    <td>{priorityRender(cell?.row?.priorityID)}</td>
                     &nbsp;
                     &nbsp;
                     <DynamicLink
@@ -298,7 +339,7 @@ function DashBoardComponent(props) {
             editable: false,
             renderCell: (cell) => {
                 return <td>
-                    <div class="date-time"> <span>{cell?.row?.req_date}</span></div>
+                    <div class="date-time"><span>{new Date(cell?.row?.req_date)?.toLocaleDateString('vi') ?? ""}</span></div>
                 </td>
             }
         },
@@ -310,7 +351,7 @@ function DashBoardComponent(props) {
             editable: false,
             renderCell: (cell) => {
                 return <td>
-                    <div class="date-time"> <span>{cell?.row?.perfome_date}</span></div>
+                    <div class="date-time"> <span>{new Date(cell?.row?.perfome_date)?.toLocaleDateString('vi') ?? ""}</span></div>
                 </td>
             }
         },
@@ -324,11 +365,6 @@ function DashBoardComponent(props) {
             editable: false,
             renderCell: (cell) => {
                 return <>
-                    <td>
-                        <div class="user-avatar">
-                            <img src="/asset/images/icons/avatar.png" alt="" />
-                        </div>
-                    </td>
                     <td>
                         <p>Nguyễn Văn A</p>
                     </td>
@@ -349,12 +385,221 @@ function DashBoardComponent(props) {
         },
     ];
 
-    const renderGridByCategory=()=>{
-        if(selectedData.category===TaskCategory.TIEPNOPQUY){
+    const columnsYCHTX = [
+        {
+            field: 'req_code',
+            headerName: "Mã yêu cầu",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: false,
+            renderCell: (cell) => {
+                return <>
+                    <td>{priorityRender(cell?.row?.priorityID)}</td>
+                    &nbsp;
+                    &nbsp;
+                    <DynamicLink
+                        href={`/document-board?id=${cell?.row?.id}&category=${selectedData.category}`}
+                        as={`/document-board?id=${cell?.row?.id}&category=${selectedData.category}`}
+                    >
+                        <a>
+                            <td>
+                                <p>{cell?.row?.req_code}</p>
+                            </td>
+                        </a>
+                    </DynamicLink>
+                </>
+            }
+        },
+        {
+            field: 'req_name',
+            headerName: "Tên yêu cầu",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: false,
+            renderCell: (cell) => {
+                return <td>
+                    <p>{cell?.row?.req_name}</p>
+                </td>
+
+            }
+        },
+        {
+            field: 'req_place',
+            headerName: "Địa điểm",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: false,
+            renderCell: (cell) => {
+                return <td>
+                    <p>{cell?.row?.req_place}</p>
+                </td>
+
+            }
+        },
+        {
+            field: 'statusID',
+            headerName: "Trạng thái",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: false,
+            renderCell: (cell) => {
+                return <td>
+                    {statusRender(cell?.row?.statusID)}
+                </td>
+            }
+        },
+        {
+            field: 'req_date',
+            headerName: "Ngày yêu cầu",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: false,
+            renderCell: (cell) => {
+                return <td>
+                    <div class="date-time"> <span>{new Date(cell?.row?.req_date)?.toLocaleDateString('vi') ?? ""}</span></div>
+                </td>
+            }
+        },
+        {
+            field: 'createdBy',
+            headerName: "Người tạo",
+            headerAlign: 'left',
+            headerClassName: 'headerColumn',
+            minWidth: 50,
+            flex: 1,
+            editable: false,
+            renderCell: (cell) => {
+                return <>
+                    <td>
+                        <p>Nguyễn Văn A</p>
+                    </td>
+                </>
+            }
+        },
+        {
+            field: 'action',
+            headerName: 'Thao tác',
+            sortable: false,
+            headerClassName: 'headerColumn',
+            headerAlign: 'center',
+            flex: 1,
+            disableClickEventBubbling: true,
+            renderCell: (cell) => {
+                return renderActionGrid(cell?.row)
+            }
+        },
+    ];
+
+
+    const columnsPYCHTX = [
+        {
+            field: 'req_code',
+            headerName: "Mã yêu cầu",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: false,
+            renderCell: (cell) => {
+                return <>
+                    <td>{priorityRender(cell?.row?.priorityID)}</td>
+                    &nbsp;
+                    &nbsp;
+                    <DynamicLink
+                        href={`/document-board?id=${cell?.row?.id}&category=${selectedData.category}`}
+                        as={`/document-board?id=${cell?.row?.id}&category=${selectedData.category}`}
+                    >
+                        <a>
+                            <td>
+                                <p>{cell?.row?.req_code}</p>
+                            </td>
+                        </a>
+                    </DynamicLink>
+                </>
+            }
+        },
+        {
+            field: 'dvkd_id',
+            headerName: "ĐVKD",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: false,
+            renderCell: (cell) => {
+                return <td>
+                    <p>{cell?.row?.dvkd?.name}</p>
+                </td>
+
+            }
+        },
+        {
+            field: 'status',
+            headerName: "Trạng thái",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: false,
+            renderCell: (cell) => {
+                return <td>
+                    {statusRender(cell?.row?.status)}
+                </td>
+            }
+        },
+        {
+            field: 'req_date',
+            headerName: "Ngày yêu cầu",
+            headerClassName: 'headerColumn',
+            flex: 1,
+            editable: false,
+            renderCell: (cell) => {
+                return <td>
+                    <div class="date-time"> <span>{new Date(cell?.row?.req_date)?.toLocaleDateString('vi') ?? ""}</span></div>
+                </td>
+            }
+        },
+        {
+            field: 'createdBy',
+            headerName: "Người tạo",
+            headerAlign: 'left',
+            headerClassName: 'headerColumn',
+            minWidth: 50,
+            flex: 1,
+            editable: false,
+            renderCell: (cell) => {
+                return <>
+                    {/* <td>
+                        <div class="user-avatar">
+                            <img src="/asset/images/icons/avatar.png" alt="" />
+                        </div>
+                    </td> */}
+                    <td>
+                        <p>Nguyễn Văn A</p>
+                    </td>
+                </>
+            }
+        },
+        {
+            field: 'action',
+            headerName: 'Thao tác',
+            sortable: false,
+            headerClassName: 'headerColumn',
+            headerAlign: 'center',
+            flex: 1,
+            disableClickEventBubbling: true,
+            renderCell: (cell) => {
+                return renderActionGrid(cell?.row)
+            }
+        },
+    ];
+
+    const renderGridByCategory = () => {
+        if (selectedData.category === TaskCategory.TIEPNOPQUY) {
             return columns
         }
-        if(selectedData.category===TaskCategory.LENHXUATQUY){
+        if (selectedData.category === TaskCategory.LENHXUATQUY) {
             return columnsLXQ
+        }
+        if (selectedData.category === TaskCategory.HOTROXE) {
+            return columnsYCHTX
+        }
+        if (selectedData.category === TaskCategory.PHIEUHOTROXE) {
+            return columnsPYCHTX
         }
         return columns;
     }
@@ -372,7 +617,9 @@ function DashBoardComponent(props) {
                                             // selectedData.typeCategory = item.typeCategory;
                                             // setSelectedData({ ...selectedData })
                                         }} class={`${item?.typeCategory === selectedData.typeCategory ? 'active' : ''}`}>
-                                            <DynamicLink href={item?.href} as={item?.href}>
+                                            <DynamicLink href={`${index === 0 ? item?.href : item?.href + `&category=${selectedData.category}`}`}
+                                                as={`${index === 0 ? item?.href : item?.href + `&category=${selectedData.category}`}`}
+                                            >
                                                 <a class={`wrapper-content ${item?.classbg} d-flex align-items-center`}>
                                                     <div class="icon">
                                                         <img src={item?.icon} alt="" /></div>
@@ -408,8 +655,8 @@ function DashBoardComponent(props) {
                             <div class="side-bar_bottom">
                                 <h2 class="side-bar_bottom__title">Mức độ ưu tiên</h2>
                                 <ul class="side-bar_bottom__list">
-                                    <li><a href=""> <span class="dot green"> </span><span class="txt">Thấp</span></a></li>
-                                    <li><a href=""> <span class="dot yellow"> </span><span class="txt">Trung bình</span></a></li>
+                                    <li><a href=""> <span class="dot yellow"> </span><span class="txt">Thấp</span></a></li>
+                                    <li><a href=""> <span class="dot green"> </span><span class="txt">Trung bình</span></a></li>
                                     <li><a href=""> <span class="dot red"> </span><span class="txt">Khẩn cấp</span></a></li>
                                 </ul>
                             </div>
@@ -419,18 +666,19 @@ function DashBoardComponent(props) {
                         <div class="wrapper-right_header">
                             <div class="d-flex align-items-center flex-wrap">
                                 <div class="wrapper-right_header--left d-flex align-items-center">
-                                    <label class="txt" for="">Chủ đề/Loại yêu cầu </label>
-                                    <select className='select-custom' defaultValue={selectedData.category} onChange={(e) => {
-                                        selectedData.category = e?.target?.value ?? TaskCategory.TIEPNOPQUY;
-                                        setSelectedData({ ...selectedData })
+                                    <label class="txt" for="">Loại yêu cầu </label>
+                                    <select className='select-custom' value={selectedData.category} onChange={(e) => {
+                                        // selectedData.category = e?.target?.value ?? TaskCategory.TIEPNOPQUY;
+                                        // setSelectedData({ ...selectedData })
+                                        router.push(`?typeCategory=${selectedData.typeCategory}&category=${e?.target?.value ?? TaskCategory.TIEPNOPQUY}`)
                                     }}>
                                         <option value={TaskCategory.TIEPNOPQUY}>Tiếp/nộp quỹ</option>
                                         <option value={TaskCategory.LENHXUATQUY}>Lệnh xuất quỹ</option>
-                                        <option value={TaskCategory.HOTROXE}>Yêu cầu Hỗ trợ xe</option>
+                                        <option value={TaskCategory.HOTROXE}>Hỗ trợ xe</option>
                                         <option value={TaskCategory.PHIEUHOTROXE}>Phiếu Hỗ trợ xe</option>
                                     </select>
                                 </div>
-                                <div class="wrapper-right_header--right wrap-tabs d-flex align-items-center ms-auto">
+                                {/* <div class="wrapper-right_header--right wrap-tabs d-flex align-items-center ms-auto">
                                     <div class="wrapper-right_header--right__select d-flex align-items-center">
                                         <div class="panel active" id="year">
                                             <select className='select-custom'>
@@ -451,7 +699,7 @@ function DashBoardComponent(props) {
                                         <li rel="mounth">Tháng </li>
                                         <li class="active" rel="year">Năm </li>
                                     </ul>
-                                </div>
+                                </div> */}
                             </div>
                             <form class="wrap-form">
                                 <div class="form-group">

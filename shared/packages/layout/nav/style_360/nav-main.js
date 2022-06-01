@@ -30,8 +30,9 @@ function NavBarStyle360(props) {
                     <div class="wrap-list-user">
                         <ul class="d-flex align-items-center">
                             <li class="nav-item"><a class="username d-flex align-items-center" href="thong-tin-khach-hang.html">
-                                <p>Khoa </p><img src="/asset/images/header/avatar.jpg" alt="" /></a></li>
-                            <li class="nav-item">
+                                <p>{auth?.user?.tennv} </p>
+                                <img src="/asset/images/header/avatar.jpg" alt="" /></a></li>
+                            {/* <li class="nav-item">
                                 <div class="notification"> <img src="/asset/images/icons/bell.svg" alt="" />
                                     <div class="notification_number"> <span>99</span></div>
                                 </div>
@@ -128,7 +129,7 @@ function NavBarStyle360(props) {
                                         </div>
                                     </div>
                                 </div>
-                            </li>
+                            </li> */}
                             <li class="nav-item"> <a class="logout" onClick={() => {
                                 auth.signout().then((res) => {
                                     setTimeout(() => {

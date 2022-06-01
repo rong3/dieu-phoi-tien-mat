@@ -3,7 +3,8 @@ import { actionTypes } from "../actions/masterDataAction";
 export const initialState = {
     masterData: [],
     relatedUser:[],
-    dsnv3kv:[]
+    dsnv3kv:[],
+    captren: null
 }
 
 const masterDataReducer = (state = initialState, action) => {
@@ -24,6 +25,12 @@ const masterDataReducer = (state = initialState, action) => {
             return {
                 ...state,
                 dsnv3kv: action.payload?.data ?? []
+            }
+        }
+        case actionTypes.LOAD_CAPTREN_SUCCESS: {
+            return {
+                ...state,
+                captren: action.payload ?? null
             }
         }
         default:

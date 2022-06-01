@@ -4,13 +4,14 @@ import Modal from "../../../../shared/packages/control/modal/index"
 import BreadCrum from "../../../../component/common/BreadCrum/BreadCrum"
 import TaskContainer from "../../common/taskContainer/taskContainer"
 import HistoryStep from "../historyStep/historyStep";
+import { useAuth } from "../../../../shared/packages/provider/authBase"
 
 function ContainerComponent(props) {
     const router = useRouter()
     const changeRoute = (route) => {
         router.replace(route ?? "/")
     }
-
+    const auth = useAuth();
     const [settingModal, setSettingModal] = useState({
         isOpen: true,
         category: props?.category ?? null,
@@ -25,8 +26,8 @@ function ContainerComponent(props) {
             <BreadCrum
                 data={[
                     {
-                        name: 'Tạo yêu cầu',
-                        href: '/document-board'
+                        name: props?.id ? 'Xem yêu cầu' : 'Tạo yêu cầu',
+                        href: props?.id ? `${router.asPath}` : '/document-board'
                     }
                 ]}
             />
@@ -46,9 +47,12 @@ function ContainerComponent(props) {
                             </div>
                             <form class="wrap-form" style={{ display: 'block' }}>
                                 <div class="form-row">
-                                    <div class="form-group col-lg-4">
+                                    <div class="form-group col-lg-6">
                                         <label for="">Người tạo yêu cầu:</label>
-                                        <input class="form-control" disabled type="text" style={{ color: '#000 !important', opacity: '1 !important' }} value="Trần Hoàng Triều" />
+                                        <input class="form-control" disabled type="text" style={{ color: '#000 !important', opacity: '1 !important' }} value={
+                                            settingModal?.data?.submitByModel ? `${settingModal?.data?.submitByModel?.maNhanVien} - ${settingModal?.data?.submitByModel?.hoTenDemNhanVien} ${settingModal?.data?.submitByModel?.tenNhanVien} - ${settingModal?.data?.submitByModel?.tenChucDanhMoiNhat}`
+                                                : `${auth?.user?.manv} - ${auth?.user?.tennv} - ${auth?.user?.tenchucdanh}`
+                                        } />
                                     </div>
                                 </div>
                             </form>
