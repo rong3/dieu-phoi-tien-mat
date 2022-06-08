@@ -16,11 +16,19 @@ export const GetPYCHTXById = (id) => {
     );
 }
 
-export const GetPYCHTX = (type) => {
+export const GetPYCHTX = (data) => {
+    return request(
+        'POST',
+        `PhieuHoTroXe/GetPHTX`,
+        'vi',data
+    );
+}
+
+export const GetQuantityPYCHTX = () => {
     return request(
         'GET',
-        `PhieuHoTroXe/GetPHTX?type=${type}`,
-        'vi'
+        `PhieuHoTroXe/GetQuantityInOut`,
+        'vi',
     );
 }
 

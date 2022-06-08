@@ -20,12 +20,13 @@ function DocumentBoardPage(props) {
 export async function getServerSideProps(router) {
     try {
         const { id } = router.query;
-        const { category } = router.query;
+        const { category, version } = router.query;
         console.log("SSR Example-Page id: " + id);
         return {
             props: {
                 id: id ?? null,
-                category: category ?? null
+                category: category ?? null,
+                version: version ?? null
             }
         };
     }

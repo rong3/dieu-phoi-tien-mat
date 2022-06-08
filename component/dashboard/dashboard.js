@@ -3,12 +3,12 @@ import { useRouter } from 'next/router'
 import DataGridControl from '../../shared/packages/control/grid/datagrid';
 import DynamicLink from "../../component/common/DynamicLink/DynamicLink"
 import { TaskCategory, TypeCategory } from "./common/taskContainer/taskCategory"
-import { GetYCTiepNopQuy } from "../../services/dptm/yeucautiepnopquy"
-import { GetLXQ } from "../../services/dptm/lenhxuatquy"
-import { GetYCXe } from "../../services/dptm/yeucauxe"
-import { GetPYCHTX } from "../../services/dptm/phieuychtx"
+import { GetYCTiepNopQuy, GetQuantityTNQ } from "../../services/dptm/yeucautiepnopquy"
+import { GetLXQ, GetQuantityLXQ } from "../../services/dptm/lenhxuatquy"
+import { GetYCXe, GetQuantityYCX } from "../../services/dptm/yeucauxe"
+import { GetPYCHTX, GetQuantityPYCHTX } from "../../services/dptm/phieuychtx"
 import { useDispatch, useSelector } from "react-redux";
-import { Category } from "@material-ui/icons";
+// import { Category } from "@material-ui/icons";
 
 function DashBoardComponent(props) {
     const router = useRouter();
@@ -19,11 +19,14 @@ function DashBoardComponent(props) {
 
     const [selectedData, setSelectedData] = useState({
         category: TaskCategory.TIEPNOPQUY,
-        typeCategory: null
+        typeCategory: null,
+        req_code: null,
+        uutien: null
     })
 
     const [componentData, setComponentData] = useState({
-        datagrid: []
+        datagrid: [],
+        uutien: []
     })
 
     const { masterData } = useSelector((state) => state.masterData);
@@ -38,10 +41,43 @@ function DashBoardComponent(props) {
     //     }, 0);
     // }, [])
 
+    const getQuantityRender = (data) => {
+        const ycden = programData?.find(x => x.id === 2);
+        const ycdi = programData?.find(x => x.id === 3);
+        const ycnhap = programData?.find(x => x.id === 4);
+        const yclq = programData?.find(x => x.id === 5);
+        if (ycden) {
+            ycden.quantity = data?.quantityIn ?? 0
+        }
+        if (ycdi) {
+            ycdi.quantity = data?.quantityOut ?? 0
+        }
+        if (ycnhap) {
+            ycnhap.quantity = data?.quantityDraft ?? 0
+        }
+        if (yclq) {
+            yclq.quantity = data?.quantityRelate ?? 0
+        }
+        setProgramData([...programData])
+    }
+
+    const commonParam = (data) => {
+        return {
+            type: data?.typeCategory,
+            req_code: data?.req_code ?? null,
+            uutien: data?.uutien ?? null
+        }
+    }
+
     useEffect(() => {
         if (selectedData.typeCategory) {
             if (selectedData.category === TaskCategory.TIEPNOPQUY) {
-                GetYCTiepNopQuy(selectedData.typeCategory).then((res) => {
+                GetQuantityTNQ().then((res) => {
+                    const data = res?.data;
+                    getQuantityRender(data);
+                })
+
+                GetYCTiepNopQuy(commonParam(selectedData)).then((res) => {
                     console.log({ res });
                     componentData.datagrid = res?.data ?? [];
                     setComponentData({ ...componentData })
@@ -50,7 +86,11 @@ function DashBoardComponent(props) {
                 })
             }
             if (selectedData.category === TaskCategory.LENHXUATQUY) {
-                GetLXQ(selectedData.typeCategory).then((res) => {
+                GetQuantityLXQ().then((res) => {
+                    const data = res?.data;
+                    getQuantityRender(data);
+                })
+                GetLXQ(commonParam(selectedData)).then((res) => {
                     console.log({ res });
                     componentData.datagrid = res?.data ?? [];
                     setComponentData({ ...componentData })
@@ -59,7 +99,11 @@ function DashBoardComponent(props) {
                 })
             }
             if (selectedData.category === TaskCategory.HOTROXE) {
-                GetYCXe(selectedData.typeCategory).then((res) => {
+                GetQuantityYCX().then((res) => {
+                    const data = res?.data;
+                    getQuantityRender(data);
+                })
+                GetYCXe(commonParam(selectedData)).then((res) => {
                     console.log({ res });
                     componentData.datagrid = res?.data ?? [];
                     setComponentData({ ...componentData })
@@ -68,7 +112,12 @@ function DashBoardComponent(props) {
                 })
             }
             if (selectedData.category === TaskCategory.PHIEUHOTROXE) {
-                GetPYCHTX(selectedData.typeCategory).then((res) => {
+                GetQuantityPYCHTX().then((res) => {
+                    const data = res?.data;
+                    getQuantityRender(data);
+                })
+
+                GetPYCHTX(commonParam(selectedData)).then((res) => {
                     console.log({ res });
                     componentData.datagrid = res?.data ?? [];
                     setComponentData({ ...componentData })
@@ -81,7 +130,7 @@ function DashBoardComponent(props) {
             componentData.datagrid = [];
             setComponentData({ ...componentData })
         }
-    }, [selectedData.typeCategory, selectedData.category])
+    }, [selectedData?.typeCategory,selectedData?.category,selectedData?.req_code,selectedData?.uutien])
 
     useEffect(() => {
         if (router?.query?.typeCategory) {
@@ -114,7 +163,7 @@ function DashBoardComponent(props) {
         {
             id: 2,
             name: 'Yêu cầu đến',
-            quantity: 12,
+            quantity: 0,
             icon: '/asset/images/icons/mail.svg',
             active: false,
             typeCategory: TypeCategory.YCDEN,
@@ -125,7 +174,7 @@ function DashBoardComponent(props) {
         {
             id: 3,
             name: 'Yêu cầu đi',
-            quantity: 12,
+            quantity: 0,
             icon: '/asset/images/icons/mail-1.svg',
             active: false,
             typeCategory: TypeCategory.YCDI,
@@ -136,7 +185,7 @@ function DashBoardComponent(props) {
         {
             id: 4,
             name: 'Yêu cầu nháp',
-            quantity: 12,
+            quantity: 0,
             icon: '/asset/images/icons/save-draft.svg',
             active: false,
             typeCategory: TypeCategory.YCNHAP,
@@ -147,7 +196,7 @@ function DashBoardComponent(props) {
         {
             id: 5,
             name: 'Yêu cầu liên quan',
-            quantity: 12,
+            quantity: 0,
             icon: '/asset/images/icons/product-documents.svg',
             active: false,
             typeCategory: TypeCategory.YCLIENQUAN,
@@ -198,6 +247,14 @@ function DashBoardComponent(props) {
         const findStatus = masterData?.find(x => x?.id === value);
         if (findStatus) {
             return <div class="status" style={{ background: findStatus?.master_attributes ?? "#80c2ff" }}><span>{findStatus?.master_name}</span></div>
+        }
+        return null;
+    }
+
+    const findPrioriryId = (value) => {
+        const findPriority = masterData?.filter(x=>x?.category==='uutien')?.find(x => x?.extra_data === value);
+        if (findPriority) {
+            return findPriority?.id ?? null
         }
         return null;
     }
@@ -275,7 +332,7 @@ function DashBoardComponent(props) {
             renderCell: (cell) => {
                 return <>
                     <td>
-                        <p>Nguyễn Văn A</p>
+                        <p>{`${cell?.row?.submitByModel?.hoTenDemNhanVien} ${cell?.row?.submitByModel?.tenNhanVien}`}</p>
                     </td>
                 </>
             }
@@ -366,7 +423,7 @@ function DashBoardComponent(props) {
             renderCell: (cell) => {
                 return <>
                     <td>
-                        <p>Nguyễn Văn A</p>
+                        <p>{`${cell?.row?.submitByModel?.hoTenDemNhanVien} ${cell?.row?.submitByModel?.tenNhanVien}`}</p>
                     </td>
                 </>
             }
@@ -471,7 +528,7 @@ function DashBoardComponent(props) {
             renderCell: (cell) => {
                 return <>
                     <td>
-                        <p>Nguyễn Văn A</p>
+                        <p>{`${cell?.row?.submitByModel?.hoTenDemNhanVien} ${cell?.row?.submitByModel?.tenNhanVien}`}</p>
                     </td>
                 </>
             }
@@ -489,7 +546,6 @@ function DashBoardComponent(props) {
             }
         },
     ];
-
 
     const columnsPYCHTX = [
         {
@@ -518,13 +574,13 @@ function DashBoardComponent(props) {
         },
         {
             field: 'dvkd_id',
-            headerName: "ĐVKD",
+            headerName: "Đơn vị kinh doanh",
             headerClassName: 'headerColumn',
             flex: 1,
             editable: false,
             renderCell: (cell) => {
                 return <td>
-                    <p>{cell?.row?.dvkd?.name}</p>
+                    <p>{JSON.parse(cell?.row?.dvkd?.extra_data)?.name}</p>
                 </td>
 
             }
@@ -569,7 +625,7 @@ function DashBoardComponent(props) {
                         </div>
                     </td> */}
                     <td>
-                        <p>Nguyễn Văn A</p>
+                        <p>{`${cell?.row?.submitByModel?.hoTenDemNhanVien} ${cell?.row?.submitByModel?.tenNhanVien}`}</p>
                     </td>
                 </>
             }
@@ -602,6 +658,20 @@ function DashBoardComponent(props) {
             return columnsPYCHTX
         }
         return columns;
+    }
+
+    const onSearchReq_code = (data) => {
+        const timeOutId = setTimeout(() => {
+            if (data?.trim()?.length === 0) {
+                selectedData.req_code = null;
+            }
+            else {
+                selectedData.req_code = data;
+            }
+            setSelectedData({ ...selectedData })
+        }, 1000);
+
+        return () => clearTimeout(timeOutId);
     }
 
     return (
@@ -644,20 +714,47 @@ function DashBoardComponent(props) {
                 <div class="wrapper-container d-flex align-items-start">
                     <div class="wrapper-left">
                         <div class="side-bar">
-                            <div class="side-bar_top">
+                            {/* <div class="side-bar_top">
                                 <h2 class="side-bar_top__title">Chọn trạng thái</h2>
                                 <ul class="side-bar_top__list">
                                     <li class="active"> <a href=""> <em class="material-icons">mail_outline</em><span>Tất cả</span></a></li>
                                     <li> <a href=""> <em class="material-icons">done_all</em><span>Bổ sung hồ sơ</span></a></li>
                                     <li> <a href=""> <em class="material-icons">schedule</em><span>Chưa xử lý</span></a></li>
                                 </ul>
-                            </div>
+                            </div> */}
                             <div class="side-bar_bottom">
                                 <h2 class="side-bar_bottom__title">Mức độ ưu tiên</h2>
                                 <ul class="side-bar_bottom__list">
-                                    <li><a href=""> <span class="dot yellow"> </span><span class="txt">Thấp</span></a></li>
-                                    <li><a href=""> <span class="dot green"> </span><span class="txt">Trung bình</span></a></li>
-                                    <li><a href=""> <span class="dot red"> </span><span class="txt">Khẩn cấp</span></a></li>
+                                    <li className={selectedData.uutien === null ? 'active' : ''} onClick={() => {
+                                        selectedData.uutien = null;
+                                        setSelectedData({ ...selectedData })
+                                    }}>
+                                        <a><span class="dot blue"> </span><span class="txt">Tất cả</span></a>
+                                    </li>
+
+                                    <li className={selectedData.uutien === findPrioriryId("1") ? 'active' : ''} onClick={() => {
+                                        const id = findPrioriryId("1");
+                                        selectedData.uutien = id;
+                                        setSelectedData({ ...selectedData })
+                                    }}>
+                                        <a><span class="dot yellow"> </span><span class="txt">Thấp</span></a>
+                                    </li>
+
+                                    <li className={selectedData.uutien === findPrioriryId("2") ? 'active' : ''} onClick={() => {
+                                        const id = findPrioriryId("2");
+                                        selectedData.uutien = id;
+                                        setSelectedData({ ...selectedData })
+                                    }}>
+                                        <a><span class="dot green"> </span><span class="txt">Bình thường</span></a>
+                                    </li>
+
+                                    <li className={selectedData.uutien === findPrioriryId("3") ? 'active' : ''} onClick={() => {
+                                        const id = findPrioriryId("3");
+                                        selectedData.uutien = id;
+                                        setSelectedData({ ...selectedData })
+                                    }}>
+                                        <a><span class="dot red"> </span><span class="txt">Cao</span></a>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
@@ -670,6 +767,8 @@ function DashBoardComponent(props) {
                                     <select className='select-custom' value={selectedData.category} onChange={(e) => {
                                         // selectedData.category = e?.target?.value ?? TaskCategory.TIEPNOPQUY;
                                         // setSelectedData({ ...selectedData })
+                                        selectedData.req_code = null;
+                                        setSelectedData({ ...selectedData })
                                         router.push(`?typeCategory=${selectedData.typeCategory}&category=${e?.target?.value ?? TaskCategory.TIEPNOPQUY}`)
                                     }}>
                                         <option value={TaskCategory.TIEPNOPQUY}>Tiếp/nộp quỹ</option>
@@ -704,7 +803,7 @@ function DashBoardComponent(props) {
                             <form class="wrap-form">
                                 <div class="form-group">
                                     <button><img src="/asset/images/icons/search-black.svg" alt="" /></button>
-                                    <input class="form-control" type="text" placeholder="Tìm kiếm" />
+                                    <input class="form-control" type="text" onChange={(e) => onSearchReq_code(e.target.value)} placeholder="Tìm kiếm" />
                                 </div>
                             </form>
                         </div>

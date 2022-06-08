@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
 import GroupBoxComponent from "../../../../../shared/groupBox/groupBox"
 import SelectBox from "../../../../../../shared/packages/control/selectBox/selectBox"
@@ -9,25 +9,29 @@ import { useToasts } from "react-toast-notifications";
 import { useDispatch, useSelector } from "react-redux";
 import PrioritySelect from "../../../../../common/PrioritySelect/PrioritySelect"
 import { removeAccents } from "../../../../../../services/dptm/commonService"
-import { TaoMoiYCXe, UpdateStatusYCXe, CapNhatYCXe, PostYCHTXQuantity } from "../../../../../../services/dptm/yeucauxe"
+import { TaoMoiYCXe, UpdateStatusYCXe, CapNhatYCXe, PostYCHTXQuantity, GetVersionSDBS, GetModelByVersionSDBS, PostSDBSYCHTX } from "../../../../../../services/dptm/yeucauxe"
 import Modal from "../../../../../../shared/packages/control/modal/index";
 import { TaskCategory, TypeCategory } from "../../../../../dashboard/common/taskContainer/taskCategory"
 import { useAuth } from "../../../../../../shared/packages/provider/authBase"
+import { chucdanhenum } from "../../../../../../config/chucdanh"
+import { patternLabelRelatedUser, onSeachCommon } from "../../../../../../utils/common"
 
 function VehicleRequiredComponent(props) {
-    const { id, remoteData } = props;
+    const { id, remoteData, parentData } = props;
     const { addToast } = useToasts();
     const router = useRouter();
     const auth = useAuth();
+    const nguoithuchiRef = useRef(null)
     const { masterData, relatedUser, captren } = useSelector((state) => state.masterData);
 
     const [modelData, setModelData] = useState({
         masterAttributes: [],
         nguoiLienQuan: [],
+        req_date: new Date()
     })
 
     const [isUpdateChange, setIsUpdateChange] = useState(false)
-
+    const [selectedVersionSDBS, setSelectedVersionSDBS] = useState(parentData?.version);
     const [modalLXQ, setModalLXQ] = useState({
         isOpen: false,
         data: null,
@@ -46,7 +50,9 @@ function VehicleRequiredComponent(props) {
         khuvuc: [],
         uutien: [],
         trangthai: [],
-        nguoilienquan: []
+        nguoilienquan: [],
+        nguoilienquan2: [],
+        listversion_sdbs: []
     })
 
     //func for groupbox
@@ -91,7 +97,7 @@ function VehicleRequiredComponent(props) {
                 const ycList = masterData?.filter(x => x?.category === 'yeucauhtx')
 
                 //get list loai tien
-                const currencyList = masterData?.filter(x => x?.category === 'loaitien')?.map((item) => {
+                const currencyList = masterData?.filter(x => x?.category === 'loaitien')?.sort((a, b) => a?.extra_data - b?.extra_data)?.map((item) => {
                     return {
                         id: item?.id,
                         primaryId: null,
@@ -129,7 +135,7 @@ function VehicleRequiredComponent(props) {
                 //get list nguoi uu tien
                 const relatedUserList = [...relatedUser]?.slice(0, 20)?.map(x => ({
                     id: x?.maNhanVien,
-                    name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
+                    name: patternLabelRelatedUser(x),
                     checked: false
                 }))
 
@@ -167,13 +173,12 @@ function VehicleRequiredComponent(props) {
                                 const find = relatedUser?.find(m => m?.maNhanVien === x?.nguoiLienQuan_ID) ?? null
                                 return {
                                     id: find?.maNhanVien,
-                                    name: `${find?.maNhanVien} ${find?.hoTenDemNhanVien} ${find?.tenNhanVien} - ${find?.tenChucDanhMoiNhat}`,
+                                    name: patternLabelRelatedUser(find),
                                     checked: true
                                 }
                             })
                         ]
                     })
-
                 }
             }
         }
@@ -185,31 +190,42 @@ function VehicleRequiredComponent(props) {
         setComponentData({ ...componentData });
     }, [modelData?.nguoiLienQuan])
 
-    const onSearchRelatedUser = (data) => {
-        const timeOutId = setTimeout(() => {
-            //get list nguoi uu tien
-            if (data?.trim()?.length === 0) {
-                const relatedUserList = [...relatedUser?.filter(x => !modelData?.nguoiLienQuan?.map(x => x?.id)?.includes(x?.maNhanVien))?.slice(0, 20)?.map(x => ({
-                    id: x?.maNhanVien,
-                    name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
-                    checked: x?.checked ?? false
-                })), ...modelData?.nguoiLienQuan]?.sort((a, b) => a?.checked ? -1 : 1)
-                componentData.nguoilienquan = relatedUserList;
-                setComponentData({ ...componentData })
-            }
-            else {
-                const relatedUserList = [...relatedUser?.filter(x => !modelData?.nguoiLienQuan?.map(x => x?.id)?.includes(x?.maNhanVien)
-                    && (removeAccents(x.maNhanVien)?.toLowerCase()?.indexOf(removeAccents(data)?.toLowerCase()) !== -1 || removeAccents((x?.hoTenDemNhanVien + ' ' + x?.tenNhanVien))?.toLowerCase()?.indexOf(removeAccents(data)?.toLowerCase()) !== -1))?.map(x => ({
-                        id: x?.maNhanVien,
-                        name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
-                        checked: x?.checked ?? false
-                    })), ...modelData?.nguoiLienQuan]?.sort((a, b) => a?.checked ? -1 : 1)
-                componentData.nguoilienquan = relatedUserList;
-                setComponentData({ ...componentData });
-            }
-        }, 1000);
+    useEffect(() => {
+        const findMerger = relatedUser?.find(x => x?.maNhanVien === modelData?.approved_by);
+        if (findMerger) {
+            componentData.nguoilienquan2 = [
+                {
+                    id: findMerger?.maNhanVien,
+                    name: patternLabelRelatedUser(findMerger),
+                    checked: true
+                }
+                , ...componentData.nguoilienquan?.filter(x => x.id !== modelData?.approved_by)];
+        }
+        else {
+            componentData.nguoilienquan2 = [...componentData.nguoilienquan];
+        }
+        setComponentData({ ...componentData });
+    }, [modelData?.approved_by, relatedUser])
 
-        return () => clearTimeout(timeOutId);
+    //get version sdbs
+    useEffect(() => {
+        const statusCode = findStatusByID(modelData?.statusID)?.code ?? null
+        const isThuHoTheoHopDong = showControlTheoThucTe() === false;
+        if (isThuHoTheoHopDong && statusCode === 'received') {
+            GetVersionSDBS({
+                id: modelData?.id
+            }).then((res) => {
+                const dataVersion = res?.data ?? null;
+                if (dataVersion) {
+                    componentData.listversion_sdbs = [{ id: 0, version: 'Bản gốc' }, ...dataVersion];
+                    setComponentData({ ...componentData })
+                }
+            })
+        }
+    }, [modelData?.statusID])
+
+    const onSearchRelatedUser = (data) => {
+        onSeachCommon(data, relatedUser, modelData, componentData, setComponentData)
     }
 
     const overwriteModel = (key, value) => {
@@ -225,7 +241,7 @@ function VehicleRequiredComponent(props) {
     const isDisabledControl = () => {
         const status = findStatusByID(modelData?.statusID)?.code ?? null
         if (['approved', 'waitapproved', 'cancel', 'received', 'inprogress'].includes(status)) {
-            if (status === 'approved' && showControlTheoThucTe() === false) {
+            if (['received', 'approved'].includes(status) && showControlTheoThucTe() === false) {
                 return false
             }
             return true
@@ -302,6 +318,48 @@ function VehicleRequiredComponent(props) {
         })
     }
 
+    const updateSDBSYCXeFunction = (model) => {
+        const convertModel = {
+            ...model,
+            yc_hotroxe_id: model?.id,
+            quanlytructiep: captren?.maNhanVien,
+            masterAttributes: model?.masterAttributes?.map(y => {
+                return {
+                    "master_id": y?.id,
+                    "category": "YeucauxeSDBS",
+                    "attributes": y?.attributes ?? JSON.stringify({
+                        amount: y?.data ? Number.parseInt(y?.data) : null,
+                        checked: y?.checked ?? false
+                    })
+                }
+            }),
+            nguoiLienQuan: model?.nguoiLienQuan?.filter(x => x?.checked)?.map(y => {
+                return {
+                    "nguoiLienQuan_ID": y?.id,
+                    "category": "YeucauxeSDBS"
+                }
+            }),
+        }
+        PostSDBSYCHTX(convertModel).then((res) => {
+            GetVersionSDBS({
+                id: modelData?.id
+            }).then((res) => {
+                const dataVersion = res?.data ?? null;
+                if (dataVersion) {
+                    componentData.listversion_sdbs = [{ id: 0, version: 'Bản gốc' }, ...dataVersion];
+                    setComponentData({ ...componentData })
+                }
+            })
+            addToast(<div className="text-center">
+                Cập nhật thành công
+            </div>, { appearance: 'success' });
+        }).catch((err) => {
+            addToast(<div className="text-center">
+                Cập nhật thất bại
+            </div>, { appearance: 'error' });
+        })
+    }
+
     const updateStatusycxFunction = (status, lydotuchoi = null) => {
         const data = {
             id: id,
@@ -336,22 +394,34 @@ function VehicleRequiredComponent(props) {
             case 'draft': return ['update', 'waitapproved']
             case 'addition': return ['update', 'waitapproved']
             case 'waitapproved': return ['addition', 'approved']
-            case 'approved': return isThuHoTheoHopDong ? ['publish'] : ['inprogress']
+            case 'approved': return ['inprogress']
             case 'inprogress': return ['received']
-            case 'received': return ['taophieuychtx']
+            case 'received': return isThuHoTheoHopDong ? ['publish'] : ['taophieuychtx']
             default: return ['draft', 'add']
         }
     }
 
     const roleButton = (type) => {
+        const machucdanh = auth?.user?.machucdanh;
         const roleData = modelData?.quanlytructiep === auth?.user?.manv ? 'qltt' : 'user';
-        if (['qltt'].includes(roleData)) {
+        if (['qltt'].includes(roleData) || chucdanhenum.TBPDPTM.includes(machucdanh)) {
             return ['addition', 'approved']?.includes(type)
         }
         if (['user'].includes(roleData)) {
-            return ['update', 'waitapproved', 'inprogress', 'inprogress', 'received', 'taophieuychtx', 'draft', 'add','publish']?.includes(type)
+            if (chucdanhenum.THUQUY.includes(machucdanh)
+                || chucdanhenum.GDV.includes(machucdanh)
+            ) {
+                return ['draft', 'add', 'update', 'waitapproved']?.includes(type)
+            }
+            if (chucdanhenum.TDV.includes(machucdanh)
+                || modelData?.approved_by === auth?.user?.manv
+                || chucdanhenum.CVDPTM.includes(machucdanh)
+            ) {
+                return ['addition', 'approved', 'taophieuychtx', 'received', 'publish', 'inprogress']?.includes(type)
+            }
+            // return ['update', 'waitapproved', 'inprogress', 'received', 'taophieuychtx', 'draft', 'add', 'publish']?.includes(type)
         }
-        return true;
+        return false;
     }
 
     const typeButtonRender = (type) => {
@@ -502,7 +572,7 @@ function VehicleRequiredComponent(props) {
             return <button class="btn btn-done" style={{ marginLeft: '16px' }} type="button" tabindex="0"
                 onClick={() => {
                     if (isUpdateChange) {
-
+                        updateSDBSYCXeFunction(modelData);
                     }
                     else {
                         addToast(<div className="text-center">
@@ -535,16 +605,20 @@ function VehicleRequiredComponent(props) {
                 (id && !showControlTheoThucTe()) &&
                 <div className="form-row row">
                     <div className="form-group col-md-2">
-                        <span>Bản sửa đổi bổ sung</span>
+                        <span>Phiên bản sửa đổi</span>
                         <SelectBox id="selectbox"
-                            optionLabel="name"
-                            optionValue="id"
+                            optionLabel="version"
+                            optionValue="version"
                             onChange={(data) => {
-
+                                // setSelectedVersionSDBS(data)
+                                if (data !== 'Bản gốc')
+                                    router.push(`/document-board?id=${modelData?.id}&category=HOTROXE&version=${data}`)
+                                else
+                                    router.push(`/document-board?id=${modelData?.id}&category=HOTROXE`)
                             }}
-                            value={null}
+                            value={selectedVersionSDBS ?? 'Bản gốc'}
                             isPortal
-                            options={[]}
+                            options={componentData.listversion_sdbs}
                         />
                     </div>
                 </div>
@@ -556,11 +630,62 @@ function VehicleRequiredComponent(props) {
                         overwriteModel('priorityID', data)
                     }} />
                 </div>
+                <div className="form-group col-lg-4">
+                    <label>Người uỷ quyền</label>
+                    <SelectBox id="selectbox"
+                        optionLabel="name"
+                        optionValue="id"
+                        isDisabled={isDisabledControl()}
+                        onChange={(data) => {
+                            overwriteModel('approved_by', data)
+                            nguoithuchiRef.current = data
+                        }}
+                        onInputChange={(data) => {
+                            const timeOutId = setTimeout(() => {
+                                //get list nguoi uu tien
+                                if (data?.trim()?.length === 0) {
+                                    const selectedCache = relatedUser?.find(x => x.maNhanVien === nguoithuchiRef?.current);
+                                    if (selectedCache) {
+                                        const relatedUserList = [...relatedUser?.slice(0, 20)?.map(x => ({
+                                            id: x?.maNhanVien,
+                                            name: patternLabelRelatedUser(x),
+                                        })), ...[{
+                                            id: selectedCache?.maNhanVien,
+                                            name: patternLabelRelatedUser(selectedCache),
+                                        }]]
+                                        componentData.nguoilienquan2 = relatedUserList;
+                                        setComponentData({ ...componentData })
+                                    }
+                                    else {
+                                        const relatedUserList = [...relatedUser?.slice(0, 20)?.map(x => ({
+                                            id: x?.maNhanVien,
+                                            name: patternLabelRelatedUser(x),
+                                        }))]
+                                        componentData.nguoilienquan2 = relatedUserList;
+                                        setComponentData({ ...componentData })
+                                    }
+                                }
+                                else {
+                                    const relatedUserList = [...relatedUser?.filter(x =>
+                                        (x?.email?.indexOf(data) !== -1 || removeAccents(x.maNhanVien)?.toLowerCase()?.indexOf(removeAccents(data)?.toLowerCase()) !== -1 || removeAccents((x?.hoTenDemNhanVien + ' ' + x?.tenNhanVien))?.toLowerCase()?.indexOf(removeAccents(data)?.toLowerCase()) !== -1))?.map(x => ({
+                                            id: x?.maNhanVien,
+                                            name: patternLabelRelatedUser(x),
+                                        }))]
+                                    componentData.nguoilienquan2 = relatedUserList;
+                                    setComponentData({ ...componentData });
+                                }
+                            }, 1000);
+                        }}
+                        value={modelData?.approved_by}
+                        isPortal
+                        options={componentData?.nguoilienquan2}
+                    />
+                </div>
                 <div class="form-group col-lg-4">
                     <label for="">Quản lý trực tiếp</label>
                     <InputControl disabled={true} type="text" id="quanlytructiep"
                         defaultValue={modelData?.quanlytructiep ?
-                            `${modelData?.quanlytructiep}`
+                            `${modelData?.quanlytructiepModel?.maNhanVien} - ${modelData?.quanlytructiepModel?.hoTenDemNhanVien} ${modelData?.quanlytructiepModel?.tenNhanVien} - ${modelData?.quanlytructiepModel?.tenChucDanhMoiNhat}`
                             : `${captren?.maNhanVien} - ${captren?.hoTenDemNhanVien} ${captren?.tenNhanVien} - ${captren?.tenChucDanhMoiNhat}`}
                     />
                 </div>
@@ -596,20 +721,20 @@ function VehicleRequiredComponent(props) {
                 {
                     showControlTheoThucTe() ||
                     <div className="form-group col-md-4">
-                        <span>Tên khách hàng</span>
+                        <label>Tên khách hàng</label>
                         <InputControl disabled={isDisabledControl()} defaultValue={modelData?.customer_name} type="text" id="name" onChange={(e) => {
                             overwriteModel('customer_name', e?.target?.value)
                         }} />
                     </div>
                 }
                 <div className="form-group col-md-4">
-                    <span>Tên yêu cầu</span>
+                    <label>Tên yêu cầu</label>
                     <InputControl disabled={isDisabledControl()} type="text" id="name" onChange={(e) => {
                         overwriteModel('req_name', e?.target?.value)
                     }} defaultValue={modelData?.req_name} />
                 </div>
                 <div className="form-group col-md-4">
-                    <span>Yêu cầu</span>
+                    <label>Yêu cầu</label>
                     <SelectBox id="selectbox"
                         isDisabled={isDisabledControl()}
                         optionLabel="master_name"
@@ -623,8 +748,8 @@ function VehicleRequiredComponent(props) {
                     />
                 </div>
                 <div className="form-group col-md-4">
-                    <span>Thời gian</span>
-                    <DateTimeInput selected={modelData?.req_date ? new Date(modelData?.req_date) : null}
+                    <label>Thời gian</label>
+                    <DateTimeInput selected={modelData?.req_date ? new Date(modelData?.req_date) : new Date()}
                         disabled={isDisabledControl()}
                         isDefaultEmpty
                         isPortal
@@ -633,7 +758,7 @@ function VehicleRequiredComponent(props) {
                         }} />
                 </div>
                 <div className="form-group col-md-4">
-                    <span>Địa điểm</span>
+                    <label>Địa điểm</label>
                     <InputControl disabled={isDisabledControl()} type="text" id="name" onChange={(e) => {
                         overwriteModel('req_place', e?.target?.value)
                     }} defaultValue={modelData?.req_place} />
@@ -641,7 +766,7 @@ function VehicleRequiredComponent(props) {
                 {
                     showControlTheoThucTe() ||
                     <div className="form-group col-md-4">
-                        <span>Nộp quỹ</span>
+                        <label>Nộp quỹ</label>
                         <SelectBox isDisabled={isDisabledControl()} id="selectbox"
                             optionLabel="name"
                             optionValue="id"
@@ -655,7 +780,7 @@ function VehicleRequiredComponent(props) {
                     </div>
                 }
                 <div className="form-group col-md-12">
-                    <span>Mô tả</span>
+                    <label>Mô tả</label>
                     <InputControl disabled={isDisabledControl()} type="textarea" id="name" defaultValue={modelData?.desc} onChange={(e) => {
                         const value = e.target.value ?? '';
                         overwriteModel('desc', value)

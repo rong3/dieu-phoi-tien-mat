@@ -24,11 +24,19 @@ export const GetLXQById = (id) => {
     );
 }
 
-export const GetLXQ = (type) => {
+export const GetQuantityLXQ = () => {
     return request(
         'GET',
-        `LXQ/GetLXQ?type=${type}`,
-        'vi'
+        `LXQ/GetQuantityInOut`,
+        'vi',
+    );
+}
+
+export const GetLXQ = (data) => {
+    return request(
+        'POST',
+        `LXQ/GetLXQ`,
+        'vi',data
     );
 }
 

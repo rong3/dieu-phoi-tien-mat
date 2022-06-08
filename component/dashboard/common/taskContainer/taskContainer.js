@@ -6,7 +6,7 @@ import VehicleRequiredComponent from "../../../taskManage/subcomponent/vehicle/s
 import VehicleReleaseContainer from "../../../taskManage/subcomponent/vehicleRelease/component/vehicleReleaseContainer/vehicleReleaseContainer"
 import { TaskCategory } from "./taskCategory"
 import { GetYCTiepNopQuyById } from "../../../../services/dptm/yeucautiepnopquy"
-import { GetYCXeById } from "../../../../services/dptm/yeucauxe"
+import { GetYCXeById, GetModelByVersionSDBS } from "../../../../services/dptm/yeucauxe"
 import { GetLXQById } from "../../../../services/dptm/lenhxuatquy"
 import { useAuth } from "../../../../shared/packages/provider/authBase"
 import { useDispatch, useSelector } from "react-redux";
@@ -40,8 +40,8 @@ function TaskContainer(props) {
         switch (type) {
             case TaskCategory.TIEPNOPQUY: return <TicketRequiredComponent remoteData={remoteData} {...props} />
             case TaskCategory.LENHXUATQUY: return <FundReleaseContainer parentData={modalData} setParentData={setModelData} fromContainer={true} {...props} />
-            case TaskCategory.HOTROXE: return <VehicleRequiredComponent remoteData={remoteData} {...props} />
-            case TaskCategory.PHIEUHOTROXE: return <VehicleReleaseContainer  parentData={modalData} setParentData={setModelData} fromContainer={true} {...props} />
+            case TaskCategory.HOTROXE: return <VehicleRequiredComponent remoteData={remoteData} parentData={modalData}  {...props} />
+            case TaskCategory.PHIEUHOTROXE: return <VehicleReleaseContainer parentData={modalData} setParentData={setModelData} fromContainer={true} {...props} />
             default: return <></>
         }
     }
@@ -57,15 +57,27 @@ function TaskContainer(props) {
                 }).catch(() => { })
             }
             if (selectedType === TaskCategory.HOTROXE) {
-                GetYCXeById(id).then((res) => {
-                    const data = res?.data;
-                    remoteData.model = data ?? null
-                    setRemoteData({ ...remoteData })
-                    setModelData({ ...modalData, data: { ...data } })
-                }).catch(() => { })
+                if (modalData?.version) {
+                    GetModelByVersionSDBS({
+                        id: id,
+                        version: modalData?.version
+                    }).then((res) => {
+                        const data = res?.data;
+                        remoteData.model = { ...data, id: id } ?? null
+                        setRemoteData({ ...remoteData })
+                        setModelData({ ...modalData, data: { ...data } })
+                    }).catch(() => { })
+                }
+                else
+                    GetYCXeById(id).then((res) => {
+                        const data = res?.data;
+                        remoteData.model = data ?? null
+                        setRemoteData({ ...remoteData })
+                        setModelData({ ...modalData, data: { ...data } })
+                    }).catch(() => { })
             }
         }
-    }, [id, selectedType])
+    }, [id, selectedType,modalData?.version])
 
     return (
         <form class="wrap-form">

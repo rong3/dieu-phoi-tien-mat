@@ -63,6 +63,7 @@ export function useProvideAuth(props) {
                         CookieHelper.setCookie(authenticationConstant.tokenKey, accessToken);
                         setUser({ ...data });
                         if (data) {
+                            delete data?.token;
                             localStorage.setItem("user", JSON.stringify(data))
                         }
                         setIsAuthenticated(true)

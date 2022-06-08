@@ -11,6 +11,8 @@ import { removeAccents } from "../../../../../../services/dptm/commonService"
 import { GetPYCHTXById, UpdatePYCHTXById, UpdateStatusPYCHTX, PostPYCHTX } from "../../../../../../services/dptm/phieuychtx"
 import { GetYCXe } from "../../../../../../services/dptm/yeucauxe"
 import { useAuth } from "../../../../../../shared/packages/provider/authBase"
+import { chucdanhenum } from "../../../../../../config/chucdanh"
+import { patternLabelRelatedUser, onSeachCommon } from "../../../../../../utils/common"
 
 function VehicleReleaseContainer(props) {
     const { id, selected, parentData, setParentData } = props;
@@ -35,7 +37,8 @@ function VehicleReleaseContainer(props) {
     const [modelData, setModelData] = useState({
         masterAttributes: [],
         nguoiLienQuan: [],
-        chuyenthucthi_ID: null
+        chuyenthucthi_ID: null,
+        perfome_date: new Date()
     })
     const nguoithuchiRef = useRef(null)
 
@@ -52,7 +55,11 @@ function VehicleReleaseContainer(props) {
             })
         }
         else {
-            GetYCXe().then((res) => {
+            GetYCXe({
+                "type": null,
+                "req_code": null,
+                "uutien": null
+            }).then((res) => {
                 const statusFind = findStatus('received');
                 const convert = res?.data?.filter(x => x.statusID === statusFind?.id)?.map(x => ({
                     id: x?.id,
@@ -79,7 +86,7 @@ function VehicleReleaseContainer(props) {
                 const lycList = masterData?.filter(x => x?.category === 'yeucaulxq')
 
                 //get list loai tien
-                const currencyList = masterData?.filter(x => x?.category === 'loaitien')?.map((item) => {
+                const currencyList = masterData?.filter(x => x?.category === 'loaitien')?.sort((a, b) => a?.extra_data - b?.extra_data)?.map((item) => {
                     return {
                         id: item?.id,
                         primaryId: null,
@@ -117,7 +124,7 @@ function VehicleReleaseContainer(props) {
                 //get list nguoi uu tien
                 const relatedUserList = [...relatedUser?.slice(0, 20)?.map(x => ({
                     id: x?.maNhanVien,
-                    name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
+                    name: patternLabelRelatedUser(x),
                     checked: false
                 }))]
 
@@ -174,7 +181,7 @@ function VehicleReleaseContainer(props) {
                                 const find = relatedUser?.find(m => m?.maNhanVien === x?.nguoiLienQuan_ID || m?.maNhanVien === x?.id) ?? null
                                 return {
                                     id: find?.maNhanVien,
-                                    name: `${find?.maNhanVien} ${find?.hoTenDemNhanVien} ${find?.tenNhanVien} - ${find?.tenChucDanhMoiNhat}`,
+                                    name: patternLabelRelatedUser(find),
                                     checked: true
                                 }
                             })
@@ -183,7 +190,7 @@ function VehicleReleaseContainer(props) {
 
                     componentData.nguoilienquan = [...relatedUser.filter(x => modelData?.nguoiLienQuan?.map(m => m?.nguoiLienQuan_ID || m?.id)?.includes(x?.maNhanVien))?.map((item => ({
                         id: item?.maNhanVien,
-                        name: `${item?.maNhanVien} ${item?.hoTenDemNhanVien} ${item?.tenNhanVien} - ${item?.tenChucDanhMoiNhat}`,
+                        name: patternLabelRelatedUser(item),
                         checked: true
                     })))
                         , ...componentData.nguoilienquan?.filter(x => !modelData?.nguoiLienQuan?.map(y => y.nguoiLienQuan_ID)?.includes(x?.id))];
@@ -201,7 +208,7 @@ function VehicleReleaseContainer(props) {
             componentData.nguoilienquan2 = [
                 {
                     id: findMerger?.maNhanVien,
-                    name: `${findMerger?.maNhanVien} ${findMerger?.hoTenDemNhanVien} ${findMerger?.tenNhanVien} - ${findMerger?.tenChucDanhMoiNhat}`,
+                    name: patternLabelRelatedUser(findMerger),
                     checked: true
                 }
                 , ...componentData.nguoilienquan?.filter(x => x.id !== modelData?.nguoi_lien_quan_id)];
@@ -248,30 +255,7 @@ function VehicleReleaseContainer(props) {
 
 
     const onSearchRelatedUser = (data) => {
-        const timeOutId = setTimeout(() => {
-            //get list nguoi uu tien
-            if (data?.trim()?.length === 0) {
-                const relatedUserList = [...relatedUser?.filter(x => !modelData?.nguoiLienQuan?.map(x => x?.id)?.includes(x?.maNhanVien))?.slice(0, 20)?.map(x => ({
-                    id: x?.maNhanVien,
-                    name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
-                    checked: x?.checked ?? false
-                })), ...modelData?.nguoiLienQuan]?.sort((a, b) => a?.checked ? -1 : 1)
-                componentData.nguoilienquan = relatedUserList;
-                setComponentData({ ...componentData })
-            }
-            else {
-                const relatedUserList = [...relatedUser?.filter(x => !modelData?.nguoiLienQuan?.map(x => x?.id)?.includes(x?.maNhanVien)
-                    && (removeAccents(x.maNhanVien)?.toLowerCase()?.indexOf(removeAccents(data)?.toLowerCase()) !== -1 || removeAccents((x?.hoTenDemNhanVien + ' ' + x?.tenNhanVien))?.toLowerCase()?.indexOf(removeAccents(data)?.toLowerCase()) !== -1))?.map(x => ({
-                        id: x?.maNhanVien,
-                        name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
-                        checked: x?.checked ?? false
-                    })), ...modelData?.nguoiLienQuan]?.sort((a, b) => a?.checked ? -1 : 1)
-                componentData.nguoilienquan = relatedUserList;
-                setComponentData({ ...componentData });
-            }
-        }, 1000);
-
-        return () => clearTimeout(timeOutId);
+        onSeachCommon(data, relatedUser, modelData, componentData, setComponentData)
     }
 
     const overwriteModel = (key, value) => {
@@ -294,14 +278,18 @@ function VehicleReleaseContainer(props) {
     }
 
     const roleButton = (type) => {
+        const machucdanh = auth?.user?.machucdanh;
         const roleData = modelData?.quanlytructiep === auth?.user?.manv ? 'qltt' : 'user';
-        if (['qltt'].includes(roleData)) {
+        if (['qltt'].includes(roleData) || chucdanhenum.TBPDPTM.includes(machucdanh)) {
             return ['addition', 'approved']?.includes(type)
         }
         if (['user'].includes(roleData)) {
-            return ['update', 'waitapproved', 'complete', 'draft', 'add']?.includes(type)
+            if (chucdanhenum.CVDPTM.includes(machucdanh)
+            ) {
+                return ['update', 'waitapproved', 'complete', 'draft', 'add']?.includes(type)
+            }
         }
-        return true;
+        return false;
     }
 
     const typeButtonRender = (type) => {
@@ -487,7 +475,7 @@ function VehicleReleaseContainer(props) {
             {
                 id === null &&
                 <div className="form-row row">
-                    <div className="form-group col-md-4">
+                    <div className="form-group col-md-6">
                         <span>Yêu cầu hỗ trợ xe</span>
                         <SelectBox id="selectbox"
                             optionLabel="name"
@@ -510,11 +498,13 @@ function VehicleReleaseContainer(props) {
                         overwriteModel('priorityID', data)
                     }} />
                 </div>
+            </div>
+            <div className="form-row row">
                 <div class="form-group col-lg-6">
                     <span>Quản lý trực tiếp</span>
                     <InputControl disabled={true} type="text" id="quanlytructiep"
                         defaultValue={modelData?.quanlytructiep ?
-                            `${modelData?.quanlytructiep}`
+                            `${modelData?.quanlytructiepModel?.maNhanVien} - ${modelData?.quanlytructiepModel?.hoTenDemNhanVien} ${modelData?.quanlytructiepModel?.tenNhanVien} - ${modelData?.quanlytructiepModel?.tenChucDanhMoiNhat}`
                             : `${captren?.maNhanVien} - ${captren?.hoTenDemNhanVien} ${captren?.tenNhanVien} - ${captren?.tenChucDanhMoiNhat}`}
                     />
                 </div>
@@ -535,13 +525,20 @@ function VehicleReleaseContainer(props) {
                 </div>
                 <div className="form-group col-md-6">
                     <span>Ngày thực hiện</span>
-                    <DateTimeInput selected={modelData?.perfome_date ? new Date(modelData?.perfome_date) : null}
+                    <DateTimeInput selected={modelData?.perfome_date ? new Date(modelData?.perfome_date) : new Date()}
                         disabled={isDisabledControl()}
                         isDefaultEmpty
                         isPortal
                         id="startDatePerform" isOnlyDate={true} onChange={(data) => {
                             overwriteModel('perfome_date', data)
                         }} />
+                </div>
+                <div className="form-group col-md-6">
+                    <span>Biển số xe</span>
+                    <InputControl rows={9} disabled={isDisabledControl()} type="text" id="platenumber" onChange={(e) => {
+                        const value = e.target.value ?? '';
+                        overwriteModel('platenumber', value)
+                    }} defaultValue={modelData?.platenumber} />
                 </div>
             </div>
             <div className='form-row row'>
@@ -634,10 +631,10 @@ function VehicleReleaseContainer(props) {
                                     if (selectedCache) {
                                         const relatedUserList = [...relatedUser?.slice(0, 20)?.map(x => ({
                                             id: x?.maNhanVien,
-                                            name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
+                                            name: patternLabelRelatedUser(x),
                                         })), ...[{
                                             id: selectedCache?.maNhanVien,
-                                            name: `${selectedCache?.maNhanVien} ${selectedCache?.hoTenDemNhanVien} ${selectedCache?.tenNhanVien} - ${selectedCache?.tenChucDanhMoiNhat}`,
+                                            name: patternLabelRelatedUser(selectedCache),
                                         }]]
                                         componentData.nguoilienquan2 = relatedUserList;
                                         setComponentData({ ...componentData })
@@ -645,7 +642,7 @@ function VehicleReleaseContainer(props) {
                                     else {
                                         const relatedUserList = [...relatedUser?.slice(0, 20)?.map(x => ({
                                             id: x?.maNhanVien,
-                                            name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
+                                            name: patternLabelRelatedUser(x),
                                         }))]
                                         componentData.nguoilienquan2 = relatedUserList;
                                         setComponentData({ ...componentData })
@@ -653,9 +650,9 @@ function VehicleReleaseContainer(props) {
                                 }
                                 else {
                                     const relatedUserList = [...relatedUser?.filter(x =>
-                                        (removeAccents(x.maNhanVien)?.toLowerCase()?.indexOf(removeAccents(data)?.toLowerCase()) !== -1 || removeAccents((x?.hoTenDemNhanVien + ' ' + x?.tenNhanVien))?.toLowerCase()?.indexOf(removeAccents(data)?.toLowerCase()) !== -1))?.map(x => ({
+                                        (x?.email?.indexOf(data) !== -1 || removeAccents(x.maNhanVien)?.toLowerCase()?.indexOf(removeAccents(data)?.toLowerCase()) !== -1 || removeAccents((x?.hoTenDemNhanVien + ' ' + x?.tenNhanVien))?.toLowerCase()?.indexOf(removeAccents(data)?.toLowerCase()) !== -1))?.map(x => ({
                                             id: x?.maNhanVien,
-                                            name: `${x?.maNhanVien} ${x?.hoTenDemNhanVien} ${x?.tenNhanVien} - ${x?.tenChucDanhMoiNhat}`,
+                                            name: patternLabelRelatedUser(x),
                                         }))]
                                     componentData.nguoilienquan2 = relatedUserList;
                                     setComponentData({ ...componentData });

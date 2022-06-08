@@ -15,11 +15,16 @@ function ContainerComponent(props) {
     const [settingModal, setSettingModal] = useState({
         isOpen: true,
         category: props?.category ?? null,
+        version: props?.version ?? null,
         type: props?.id ? 'edit' : 'new',
         data: {
             id: props?.id
         }
     })
+
+    useEffect(() => {
+        setSettingModal({ ...settingModal, version: props?.version })
+    }, [props?.version])
 
     return (
         <>
@@ -57,7 +62,7 @@ function ContainerComponent(props) {
                                 </div>
                             </form>
                         </div>
-                        <TaskContainer id={props?.id} modalData={settingModal} setModelData={setSettingModal} />
+                        <TaskContainer id={props?.id} modalData={{...settingModal}} setModelData={setSettingModal} />
                         {/* <HistoryStep /> */}
                     </div>
                 </div>

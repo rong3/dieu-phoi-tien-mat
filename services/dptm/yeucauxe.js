@@ -1,10 +1,10 @@
 import { request } from '../../shared/packages/service-adapter/axios';
 
-export const GetYCXe = (type) => {
+export const GetYCXe = (data) => {
     return request(
-        'GET',
-        `YCHoTroXe/GetYCHoTroXe?type=${type}`,
-        'vi',
+        'POST',
+        `YCHoTroXe/GetYCHoTroXe`,
+        'vi', data
     );
 }
 
@@ -12,6 +12,14 @@ export const GetYCXeById = (id) => {
     return request(
         'GET',
         `YCHoTroXe/GetYCHoTroXe/${id}`,
+        'vi',
+    );
+}
+
+export const GetQuantityYCX = () => {
+    return request(
+        'GET',
+        `YCHoTroXe/GetQuantityInOut`,
         'vi',
     );
 }
@@ -48,3 +56,28 @@ export const PostYCHTXQuantity = (data) => {
         'vi', data
     );
 }
+
+export const PostSDBSYCHTX = (data) => {
+    return request(
+        'POST',
+        `YCHoTroXeSDBS/PostSDBS`,
+        'vi', data
+    );
+}
+
+export const GetVersionSDBS = (data) => {
+    return request(
+        'POST',
+        `YCHoTroXeSDBS/GetVersionSDBS`,
+        'vi',data
+    );
+}
+
+export const GetModelByVersionSDBS = (data) => {
+    return request(
+        'POST',
+        `YCHoTroXeSDBS/GetSDBSByVersion`,
+        'vi',data
+    );
+}
+

@@ -1,9 +1,17 @@
 import { request } from '../../shared/packages/service-adapter/axios';
 
-export const GetYCTiepNopQuy = (type) => {
+export const GetYCTiepNopQuy = (data) => {
+    return request(
+        'POST',
+        `YCTiepNopQuy/GetYCTiepNopQuy`,
+        'vi',data
+    );
+}
+
+export const GetQuantityTNQ = () => {
     return request(
         'GET',
-        `YCTiepNopQuy/GetYCTiepNopQuy?type=${type}`,
+        `YCTiepNopQuy/GetQuantityInOut`,
         'vi',
     );
 }
